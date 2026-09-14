@@ -1,17 +1,80 @@
 from models.student import Student
 from models.degree_program import DegreeProgram
+from models.semester import Semester
+from models.module import Module
+from models.exam_result import ExamResult
+from models.exam_type import ExamType
 
 # Main Application.
 
-student = Student(
-    student_number=123456,
-    current_semester=4
-)
 
+# Degree Program
 degree_program = DegreeProgram(
     name="Computer Science",
     current_semester=4
 )
 
+# Student
+student = Student(
+    student_number=123456,
+    current_semester=4,
+    degree_program=degree_program
+)
+
+
+# Semesters
+semester_1 = Semester(name="Semester 1")
+semester_2 = Semester(name="Semester 2")
+semester_3 = Semester(name="Semester 3")
+semester_4 = Semester(name="Semester 4")
+
+
+# Modules
+python1 = Module(
+    module_number="P001",
+    name="Python Basics"
+)
+
+sql = Module(
+    module_number="SQL001",
+    name="SQL Basics"
+)
+
+python2 = Module(
+    module_number="P002",
+    name="Python Project: COurse Dashboard"
+)
+
+
+# Exam Results
+result1 = ExamResult(
+    exam_type=ExamType.PROJECT,
+    grade=1.7
+)
+
+result2 = ExamResult(
+    exam_type=ExamType.ONLINE_TEST,
+    grade=2.0
+)
+
+
+# Relationships herstellen
+
+student.degree_program = degree_program
+
+degree_program.semesters.extend([
+    semester_1,
+    semester_2,
+    semester_3,
+    semester_4
+])
+
+semester_1.modules.append(python1)
+semester_2.modules.append(sql)
+semester_4.modules.append(python2)
+
+python1.exam_results.append(result1)
+sql.exam_results.append(result2)
+
+
 print(student)
-print(degree_program)
