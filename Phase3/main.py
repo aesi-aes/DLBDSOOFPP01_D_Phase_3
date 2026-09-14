@@ -1,16 +1,17 @@
-# This is a sample Python script.
+from models.student import Student
+from models.degree_program import DegreeProgram
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Main Application.
 
+student = Student(
+    student_number=123456,
+    current_semester=4
+)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+degree_program = DegreeProgram(
+    name="Computer Science",
+    current_semester=4
+)
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+print(student)
+print(degree_program)
