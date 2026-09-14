@@ -5,6 +5,7 @@ from models.module import Module
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
 from services.study_service import StudyService
+from services.grade_service import GradeService
 
 # Main Application.
 
@@ -85,3 +86,21 @@ print(student)
 study_service = StudyService(degree_program)
 
 print(f"Anzahl Module: {study_service.get_total_modules()} vs. abgeschlossene {study_service.get_completed_modules()}, Fortschritt: {study_service.get_study_progress()}")
+
+# Test: GradeService
+
+grade_service = GradeService(degree_program)
+
+print(f"Notendurchschnitt: {grade_service.get_current_average():.2f}, Zieldurchschnitt: {grade_service.get_target_average():.2f}")
+
+new_result = ExamResult(
+    exam_type=ExamType.MANUSCRIPT,
+    grade=1.3
+)
+
+grade_service.add_exam_result(
+    sql,
+    new_result
+)
+
+print(f"Neuer Durchschnitt: {grade_service.get_current_average():.2f}")

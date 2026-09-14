@@ -7,3 +7,7 @@ from models.exam_type import ExamType
 class ExamResult:
     exam_type: ExamType
     grade: float
+
+    @property
+    def is_passed(self) -> bool:
+        return self.grade <= 4.0

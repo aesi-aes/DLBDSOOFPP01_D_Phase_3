@@ -11,4 +11,4 @@ class Module:
 
     @property
     def is_completed(self) -> bool:
-        return len(self.exam_results) > 0
+        return bool(self.exam_results)
