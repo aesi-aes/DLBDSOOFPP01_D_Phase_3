@@ -4,6 +4,7 @@ from models.semester import Semester
 from models.module import Module
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
+from services.study_service import StudyService
 
 # Main Application.
 
@@ -78,3 +79,9 @@ sql.exam_results.append(result2)
 
 
 print(student)
+
+# Test: StudyService
+
+study_service = StudyService(degree_program)
+
+print(f"Anzahl Module: {study_service.get_total_modules()} vs. abgeschlossene {study_service.get_completed_modules()}, Fortschritt: {study_service.get_study_progress()}")

@@ -19,11 +19,12 @@ class StudyService:
 
         for semester in self.degree_program.semesters:
             for module in semester.modules:
-                if module.completed:
+                if module.is_completed:
                     completed_modules += 1
 
         return completed_modules
 
+    # Studienfortschritt in [0..100] %
     def get_study_progress(self) -> float:
         total_modules = self.get_total_modules()
 
