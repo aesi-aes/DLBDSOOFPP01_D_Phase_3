@@ -44,14 +44,11 @@ class Dashboard:
             padx=(0, 10)
         )
 
-        study_progress = self.controller.study_service.get_study_progress()
-
-        study_progress_label = tk.Label(
+        self.study_progress_label = tk.Label(
             study_frame,
-            text=f"{study_progress:.1f}%",
             font=("Arial", 32, "bold")
         )
-        study_progress_label.pack()
+        self.study_progress_label.pack()
 
         # Average grade card
         grade_frame = tk.LabelFrame(
@@ -67,14 +64,11 @@ class Dashboard:
             padx=(10, 0)
         )
 
-        average = self.controller.grade_service.get_current_average()
-
-        average_label = tk.Label(
+        self.average_label = tk.Label(
             grade_frame,
-            text=f"{average:.2f}",
             font=("Arial", 32, "bold")
         )
-        average_label.pack()
+        self.average_label.pack()
 
         # Ziel-Notendurchschnitt
 
@@ -122,7 +116,41 @@ class Dashboard:
         )
         self.target_status_label.pack(pady=(10, 0))
 
+        self.update_dashboard()
+
+    def update_dashboard(self):
+        study_progress = self.controller.study_service.get_study_progress()
+
+        self.study_progress_label.config(
+            text=f"{study_progress:.1f}%",
+        )
+
+        average = self.controller.grade_service.get_current_average()
+
+        self.average_label.config(
+            text=f"{average:.2f}"
+        )
+
         self.update_target_display()
+
+    def update_target_display(self):
+        target_average = (
+            self.controller.grade_service.get_target_average()
+        )
+
+        self.target_average_label.config(
+            text=f"{target_average:.2f}"
+        )
+
+        if self.controller.grade_service.has_reached_target_average():
+            status_text = "Ziel erreicht"
+        else:
+            status_text = "Ziel noch nicht erreicht"
+
+        self.target_status_label.config(
+            text=status_text
+        )
+
 
     def on_set_target_average(self):
         try:
@@ -148,21 +176,3 @@ class Dashboard:
 
     def show(self):
         self.root.mainloop()
-
-    def update_target_display(self):
-        target_average = (
-            self.controller.grade_service.get_target_average()
-        )
-
-        self.target_average_label.config(
-            text=f"{target_average:.2f}"
-        )
-
-        if self.controller.grade_service.has_reached_target_average():
-            status_text = "Ziel erreicht"
-        else:
-            status_text = "Ziel noch nicht erreicht"
-
-        self.target_status_label.config(
-            text=status_text
-        )
