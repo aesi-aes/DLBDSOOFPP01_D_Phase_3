@@ -1,3 +1,4 @@
+from controllers.dashboard_controller import DashboardController
 from models.student import Student
 from models.degree_program import DegreeProgram
 from models.semester import Semester
@@ -32,17 +33,17 @@ semester_4 = Semester(name="Semester 4")
 
 
 # Modules
-python1 = Module(
+modulePython1 = Module(
     module_number="P001",
     name="Python Basics"
 )
 
-sql = Module(
+moduleSql = Module(
     module_number="SQL001",
     name="SQL Basics"
 )
 
-python2 = Module(
+modulePython2 = Module(
     module_number="P002",
     name="Python Project: COurse Dashboard"
 )
@@ -71,12 +72,12 @@ degree_program.semesters.extend([
     semester_4
 ])
 
-semester_1.modules.append(python1)
-semester_2.modules.append(sql)
-semester_4.modules.append(python2)
+semester_1.modules.append(modulePython1)
+semester_2.modules.append(moduleSql)
+semester_4.modules.append(modulePython2)
 
-python1.exam_results.append(result1)
-sql.exam_results.append(result2)
+modulePython1.exam_results.append(result1)
+moduleSql.exam_results.append(result2)
 
 
 print(student)
@@ -99,8 +100,25 @@ new_result = ExamResult(
 )
 
 grade_service.add_exam_result(
-    sql,
+    moduleSql,
     new_result
 )
 
 print(f"Neuer Durchschnitt: {grade_service.get_current_average():.2f}")
+
+controller = DashboardController(
+    study_service,
+    grade_service
+)
+
+new_result = ExamResult(
+    exam_type=ExamType.MANUSCRIPT,
+    grade=1.3
+)
+
+controller.on_exam_result_added(
+    modulePython2,
+    new_result
+)
+
+print(f"Module Python 2 ist abgeschlossen: {modulePython2.is_completed}, aktueller Durchschnitt: {grade_service.get_current_average()}")

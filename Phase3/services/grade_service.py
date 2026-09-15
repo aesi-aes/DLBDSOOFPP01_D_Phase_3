@@ -34,3 +34,8 @@ class GradeService:
         exam_result: ExamResult
     ):
         module.exam_results.append(exam_result)
+
+    def has_reached_target_average(self) -> bool:
+        return self.get_current_average() <= self.target_average
+
+    
