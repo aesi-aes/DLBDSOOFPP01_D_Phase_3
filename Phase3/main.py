@@ -1,6 +1,8 @@
-from application import Application
+import tkinter as tk
 
-# Main Application.
+from gui.dashboard import Dashboard
 
-application = Application()
-application.initialize()
+
+if __name__ == "__main__":
+    dashboard = Dashboard()
+    dashboard.show()
