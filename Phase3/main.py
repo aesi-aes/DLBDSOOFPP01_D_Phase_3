@@ -1,8 +1,6 @@
-import tkinter as tk
-
-from gui.dashboard import Dashboard
+from application import Application
 
 
 if __name__ == "__main__":
-    dashboard = Dashboard()
-    dashboard.show()
+    application = Application()
+    application.start()

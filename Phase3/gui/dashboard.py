@@ -1,7 +1,12 @@
 import tkinter as tk
 
+from controllers.dashboard_controller import DashboardController
+
+
 class Dashboard:
-    def __init__(self):
+    def __init__(self, controller: DashboardController):
+        self.controller = controller
+
         self.root = tk.Tk()
         self.root.title("COURSE DASHBOARD")
         self.root.geometry("900x600")
@@ -39,9 +44,11 @@ class Dashboard:
             padx=(0, 10)
         )
 
+        study_progress = self.controller.study_service.get_study_progress()
+
         study_progress_label = tk.Label(
             study_frame,
-            text="66.7%",
+            text=f"{study_progress:.1f}%",
             font=("Arial", 32, "bold")
         )
         study_progress_label.pack()
@@ -60,9 +67,11 @@ class Dashboard:
             padx=(10, 0)
         )
 
+        average = self.controller.grade_service.get_current_average()
+
         average_label = tk.Label(
             grade_frame,
-            text="1.85",
+            text=f"{average:.2f}",
             font=("Arial", 32, "bold")
         )
         average_label.pack()

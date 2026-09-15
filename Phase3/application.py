@@ -1,3 +1,4 @@
+from gui.dashboard import Dashboard
 from models.student import Student
 from models.degree_program import DegreeProgram
 from models.semester import Semester
@@ -12,6 +13,7 @@ from controllers.dashboard_controller import DashboardController
 
 class Application:
     def __init__(self):
+        self.dashboard = None
         self.student = None
         self.degree_program = None
         self.study_service = None
@@ -32,10 +34,17 @@ class Application:
             self.grade_service
         )
 
+        self.dashboard = Dashboard(
+            self.dashboard_controller
+        )
+
+        self.dashboard.show()
+
+
     def create_test_data(self):
         # Degree Program
         self.degree_program = DegreeProgram(
-            name="Computer Science",
+            name="SQL & Python Programming",
             current_semester=4
         )
 
