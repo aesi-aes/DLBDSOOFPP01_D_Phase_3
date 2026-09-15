@@ -26,6 +26,11 @@ class GradeService:
         return self.target_average
 
     def set_target_average(self, target_average: float):
+        if target_average < 1.0 or target_average > 6.0:
+            raise ValueError(
+                "Der Ziel-Durchschnitt muss zwischen 1.0 und 6.0 liegen."
+            )
+
         self.target_average = target_average
 
     def add_exam_result(

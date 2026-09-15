@@ -134,10 +134,12 @@ class Dashboard:
             )
             return
 
-        if target_average < 1.0 or target_average > 6.0:
+        try:
+            self.controller.on_target_average_changed(target_average)
+        except ValueError as error:
             messagebox.showerror(
                 "Ungültige Eingabe",
-                "Der Ziel-Durchschnitt muss zwischen 1.0 und 6.0 liegen."
+                str(error)
             )
             return
 
