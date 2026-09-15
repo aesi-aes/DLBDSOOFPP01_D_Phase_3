@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from controllers.dashboard_controller import DashboardController
-
+from tkinter import messagebox
 
 class Dashboard:
     def __init__(self, controller: DashboardController):
@@ -128,6 +128,17 @@ class Dashboard:
         try:
             target_average = float(self.target_entry.get())
         except ValueError:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                "Bitte eine gültige Zahl angeben."
+            )
+            return
+
+        if target_average < 1.0 or target_average > 6.0:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                "Der Ziel-Durchschnitt muss zwischen 1.0 und 6.0 liegen."
+            )
             return
 
         self.controller.on_target_average_changed(target_average)
