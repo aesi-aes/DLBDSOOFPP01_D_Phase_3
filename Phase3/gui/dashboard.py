@@ -171,7 +171,6 @@ class Dashboard:
             )
             return
 
-        self.controller.on_target_average_changed(target_average)
         self.update_target_display()
 
     def show(self):
