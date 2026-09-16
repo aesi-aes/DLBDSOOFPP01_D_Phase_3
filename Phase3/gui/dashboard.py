@@ -6,10 +6,11 @@ from tkinter import messagebox, ttk
 class Dashboard:
     def __init__(self, controller: DashboardController):
         self.module_tree = None
+        self.tree_items = {}
+
         self.target_average_label = None
         self.study_progress_label = None
         self.target_entry = None
-        
         self.controller = controller
 
         self.root = tk.Tk()
@@ -232,6 +233,9 @@ class Dashboard:
         for item in self.module_tree.get_children():
             self.module_tree.delete(item)
 
+        # Tree leeren
+        self.tree_items.clear()
+
         semesters = self.controller.study_service.get_semesters()
 
         for semester in semesters:
@@ -242,14 +246,14 @@ class Dashboard:
             )
 
             # Module anzeigen
-            for module in self.controller.study_service.get_modules():
+            for module in semester.modules:
                 if module.is_completed:
                     status = "Abgeschlossen"
                 else:
                     status = "Offen"
 
-                self.module_tree.insert(
-                     semester_item,
+                module_item = self.module_tree.insert(
+                    semester_item,
                     "end",
                     values=(
                         module.module_number,
@@ -257,6 +261,8 @@ class Dashboard:
                         status
                     )
                 )
+
+                self.tree_items[module_item] = module
 
     def on_module_selected(self, event):
         selected_items = self.module_tree.selection()
@@ -266,9 +272,32 @@ class Dashboard:
 
         selected_item = selected_items[0]
 
-        item = self.module_tree.item(selected_item)
+        module = self.tree_items.get(selected_item)
 
-        print(item)
+        if module is None:
+            return
+
+        self.show_exam_results(module)
+
+    def show_exam_results(self, module):
+        if not module.exam_results:
+            self.exam_results_label.config(
+                text=f"{module.name}\nNoch keine Prüfungsleistungen vorhanden."
+            )
+            return
+
+        result_lines = []
+
+        for result in module.exam_results:
+            result_lines.append(
+                f"{result.exam_type.value}: {result.grade:.1f}"
+            )
+
+        text = f"{module.name}\n" + "\n".join(result_lines)
+
+        self.exam_results_label.config(
+            text=text
+        )
 
     def on_set_target_average(self):
         try:
