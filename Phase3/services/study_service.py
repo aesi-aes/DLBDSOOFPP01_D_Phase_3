@@ -1,5 +1,6 @@
 from models.degree_program import DegreeProgram
 from models.module import Module
+from models.semester import Semester
 
 
 # StudyService ist verantwortlich für Zugriffe auf Modules und weitere Infos (Studienfortschritt etc.)
@@ -47,3 +48,6 @@ class StudyService:
             modules.extend(semester.modules)
 
         return modules
+
+    def get_semesters(self) -> list[Semester]:
+        return self.degree_program.semesters

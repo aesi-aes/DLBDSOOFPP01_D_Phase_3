@@ -14,7 +14,7 @@ class Dashboard:
 
         self.root = tk.Tk()
         self.root.title("COURSE DASHBOARD")
-        self.root.geometry("900x600")
+        self.root.geometry("900x900")
 
         self.create_widgets()
 
@@ -137,7 +137,7 @@ class Dashboard:
         self.module_tree = ttk.Treeview(
             modules_frame,
             columns=("module_number", "module_name", "status"),
-            show="headings"
+            show="tree headings"
         )
 
         self.module_tree.heading(
@@ -155,11 +155,38 @@ class Dashboard:
             text="Status"
         )
 
+        self.module_tree.bind(
+            "<<TreeviewSelect>>",
+            self.on_module_selected
+        )
+
         self.module_tree.pack(
             fill="both",
             expand=True
         )
-        
+
+        # Prüfungsergebnisse.
+        results_frame = tk.LabelFrame(
+            modules_frame,
+            text="PRÜFUNGSERGEBNISSE",
+            padx=10,
+            pady=10
+        )
+        results_frame.pack(
+            fill="x",
+            pady=(10, 0)
+        )
+
+        self.exam_results_label = tk.Label(
+            results_frame,
+            text="Kein Modul ausgewählt.",
+            anchor="w",
+            justify="left"
+        )
+        self.exam_results_label.pack(
+            fill="x"
+        )
+
         self.update_dashboard()
 
     def update_dashboard(self):
@@ -205,22 +232,43 @@ class Dashboard:
         for item in self.module_tree.get_children():
             self.module_tree.delete(item)
 
-        # Module anzeigen
-        for module in self.controller.study_service.get_modules():
-            if module.is_completed:
-                status = "Abgeschlossen"
-            else:
-                status = "Offen"
+        semesters = self.controller.study_service.get_semesters()
 
-            self.module_tree.insert(
+        for semester in semesters:
+            semester_item = self.module_tree.insert(
                 "",
                 "end",
-                values=(
-                    module.module_number,
-                    module.name,
-                    status
-                )
+                text=semester.name
             )
+
+            # Module anzeigen
+            for module in self.controller.study_service.get_modules():
+                if module.is_completed:
+                    status = "Abgeschlossen"
+                else:
+                    status = "Offen"
+
+                self.module_tree.insert(
+                     semester_item,
+                    "end",
+                    values=(
+                        module.module_number,
+                        module.name,
+                        status
+                    )
+                )
+
+    def on_module_selected(self, event):
+        selected_items = self.module_tree.selection()
+
+        if not selected_items:
+            return
+
+        selected_item = selected_items[0]
+
+        item = self.module_tree.item(selected_item)
+
+        print(item)
 
     def on_set_target_average(self):
         try:
