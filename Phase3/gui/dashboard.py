@@ -217,7 +217,7 @@ class Dashboard:
         self.delete_result_button = tk.Button(
             button_frame,
             text="Ergebnis löschen",
-            command=self.on_edit_exam_result
+            command=self.on_delete_exam_result
         )
         self.delete_result_button.pack(side="left", padx=(10, 0))
 
@@ -351,6 +351,11 @@ class Dashboard:
 
                 self.tree_items[module_item] = module
 
+                # Letztes ausgewähltes Modul wieder auswählen
+                if module == self.selected_module:
+                    self.module_tree.selection_set(module_item)
+                    self.module_tree.focus(module_item)
+
     def on_module_selected(self, event):
         selected_items = self.module_tree.selection()
 
@@ -443,6 +448,7 @@ class Dashboard:
 
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
+        self.update_dashboard()
 
     def on_save_exam_result(self):
         if self.selected_module is None:
@@ -498,6 +504,7 @@ class Dashboard:
             return
 
         self.show_exam_results(self.selected_module)
+        self.update_dashboard()
 
     def on_delete_exam_result(self):
         if self.selected_module is None:
@@ -541,6 +548,7 @@ class Dashboard:
         self.editing_exam_result = None
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
+        self.update_dashboard()
 
     def show(self):
         self.root.mainloop()
