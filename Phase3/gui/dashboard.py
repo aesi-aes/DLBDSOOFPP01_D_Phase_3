@@ -5,6 +5,7 @@ from tkinter import messagebox, ttk
 
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
+from models.module import Module
 
 
 class Dashboard:
@@ -17,7 +18,7 @@ class Dashboard:
         self.exam_result_items = {}
 
         self.new_result_button = None
-        self.edit_result_button = None
+        self.delete_result_button = None
         self.save_result_button = None
         self.editing_exam_result = None
 
@@ -32,7 +33,7 @@ class Dashboard:
 
         self.root = tk.Tk()
         self.root.title("COURSE DASHBOARD")
-        self.root.geometry("900x900")
+        self.root.geometry("900x950")
 
         self.create_widgets()
 
@@ -213,12 +214,12 @@ class Dashboard:
         )
         self.new_result_button.pack(side="left")
 
-        self.edit_result_button = tk.Button(
+        self.delete_result_button = tk.Button(
             button_frame,
-            text="Bearbeiten",
+            text="Ergebnis löschen",
             command=self.on_edit_exam_result
         )
-        self.edit_result_button.pack(side="left", padx=(10, 0))
+        self.delete_result_button.pack(side="left", padx=(10, 0))
 
         editor_frame = tk.LabelFrame(
             results_frame,
@@ -443,9 +444,6 @@ class Dashboard:
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
 
-    def on_edit_exam_result(self):
-        print("Ergebnis bearbeiten")
-
     def on_save_exam_result(self):
         if self.selected_module is None:
             messagebox.showinfo(
@@ -500,6 +498,49 @@ class Dashboard:
             return
 
         self.show_exam_results(self.selected_module)
+
+    def on_delete_exam_result(self):
+        if self.selected_module is None:
+            messagebox.showinfo(
+                "Kein Modul ausgewählt",
+                "Bitte wähle zuerst ein Modul aus."
+            )
+            return
+
+        selected_items = self.exam_results_tree.selection()
+
+        if not selected_items:
+            messagebox.showinfo(
+                "Kein Ergebnis ausgewählt",
+                "Bitte wähle zuerst ein Prüfungsergebnis aus."
+            )
+            return
+
+        selected_item = selected_items[0]
+
+        result = self.exam_result_items.get(selected_item)
+
+        if result is None:
+            return
+
+        confirmed = messagebox.askyesno(
+            "Prüfungsergebnis löschen",
+            "Möchtest du dieses Prüfungsergebnis wirklich löschen?"
+        )
+
+        if not confirmed:
+            return
+
+        self.controller.on_exam_result_deleted(
+            self.selected_module,
+            result
+        )
+
+        self.show_exam_results(self.selected_module)
+
+        self.editing_exam_result = None
+        self.exam_type_combobox.set("")
+        self.grade_entry.delete(0, tk.END)
 
     def show(self):
         self.root.mainloop()

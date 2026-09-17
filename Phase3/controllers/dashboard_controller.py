@@ -26,6 +26,16 @@ class DashboardController:
             exam_result
         )
 
+    def on_exam_result_deleted(
+            self,
+            module: Module,
+            exam_result: ExamResult
+    ):
+        self.grade_service.delete_exam_result(
+            module,
+            exam_result
+        )
+
     def on_target_average_changed(
             self,
             target_average: float
