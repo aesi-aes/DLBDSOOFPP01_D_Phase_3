@@ -392,6 +392,12 @@ class Dashboard:
 
             self.exam_result_items[item] = result
 
+        self.clear_exam_result_editor()
+
+    def clear_exam_result_editor(self):
+        self.exam_type_combobox.set("")
+        self.grade_entry.delete(0, tk.END)
+
     def on_set_target_average(self):
         try:
             target_average = float(self.target_entry.get())
