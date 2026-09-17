@@ -3,6 +3,7 @@ import tkinter as tk
 from controllers.dashboard_controller import DashboardController
 from tkinter import messagebox, ttk
 
+from models.exam_result import ExamResult
 from models.exam_type import ExamType
 
 
@@ -446,7 +447,59 @@ class Dashboard:
         print("Ergebnis bearbeiten")
 
     def on_save_exam_result(self):
-        print("Ergebnis speichern")
+        if self.selected_module is None:
+            messagebox.showinfo(
+                "Kein Modul ausgewählt",
+                "Bitte wähle zuerst ein Modul aus."
+            )
+            return
+
+        exam_type_value = self.exam_type_combobox.get()
+
+        if not exam_type_value:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                "Bitte wähle eine Prüfungsart aus."
+            )
+            return
+
+        try:
+            grade = float(self.grade_entry.get())
+        except ValueError:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                "Bitte gib eine gültige Note (von 1-6) ein."
+            )
+            return
+
+        exam_type = ExamType(exam_type_value)
+
+        try:
+            if self.editing_exam_result is None:
+                exam_result = ExamResult(
+                    exam_type=exam_type,
+                    grade=grade
+                )
+
+                self.controller.on_exam_result_added(
+                    self.selected_module,
+                    exam_result
+                )
+            else:
+                self.controller.update_exam_result(
+                    self.editing_exam_result,
+                    exam_type,
+                    grade
+                )
+
+        except ValueError as error:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                str(error)
+            )
+            return
+
+        self.show_exam_results(self.selected_module)
 
     def show(self):
         self.root.mainloop()

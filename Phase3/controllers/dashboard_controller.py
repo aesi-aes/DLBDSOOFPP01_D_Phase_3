@@ -1,4 +1,5 @@
 from models.exam_result import ExamResult
+from models.exam_type import ExamType
 from models.module import Module
 
 from services.study_service import StudyService
@@ -31,4 +32,16 @@ class DashboardController:
     ):
         self.grade_service.set_target_average(
             target_average
+        )
+
+    def update_exam_result(
+        self,
+        exam_result: ExamResult,
+        exam_type: ExamType,
+        grade: float
+    ):
+        self.grade_service.update_exam_result(
+            exam_result,
+            exam_type,
+            grade
         )

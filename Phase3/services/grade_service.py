@@ -39,6 +39,7 @@ class GradeService:
         module: Module,
         exam_result: ExamResult
     ):
+        self.validate_grade(exam_result.grade)
         module.exam_results.append(exam_result)
 
     def has_reached_target_average(self) -> bool:
@@ -50,5 +51,13 @@ class GradeService:
             exam_type: ExamType,
             grade: float
     ):
+        self.validate_grade(grade)
+
         exam_result.exam_type = exam_type
         exam_result.grade = grade
+
+    def validate_grade(self, grade: float):
+        if grade < 1.0 or grade > 6.0:
+            raise ValueError(
+                "Grade must be between 1.0 and 6.0."
+            )
