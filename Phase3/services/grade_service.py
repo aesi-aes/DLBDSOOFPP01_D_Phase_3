@@ -1,5 +1,6 @@
 from models.degree_program import DegreeProgram
 from models.exam_result import ExamResult
+from models.exam_type import ExamType
 from models.module import Module
 
 # Notenberechnung, Zieldurchschnitt setzen.
@@ -43,4 +44,11 @@ class GradeService:
     def has_reached_target_average(self) -> bool:
         return self.get_current_average() <= self.target_average
 
-    
+    def update_exam_result(
+            self,
+            exam_result: ExamResult,
+            exam_type: ExamType,
+            grade: float
+    ):
+        exam_result.exam_type = exam_type
+        exam_result.grade = grade

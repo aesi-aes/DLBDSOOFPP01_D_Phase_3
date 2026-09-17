@@ -8,6 +8,10 @@ class Dashboard:
         self.module_tree = None
         self.tree_items = {}
 
+        self.selected_module = None
+        self.exam_results_tree = None
+        self.exam_result_items = {}
+
         self.target_average_label = None
         self.study_progress_label = None
         self.target_entry = None
@@ -137,24 +141,13 @@ class Dashboard:
 
         self.module_tree = ttk.Treeview(
             modules_frame,
-            columns=("module_number", "module_name", "status"),
+            columns=("name", "status"),
             show="tree headings"
         )
 
-        self.module_tree.heading(
-            "module_number",
-            text="Modul"
-        )
-
-        self.module_tree.heading(
-            "module_name",
-            text="Name"
-        )
-
-        self.module_tree.heading(
-            "status",
-            text="Status"
-        )
+        self.module_tree.heading("#0", text="Modul")
+        self.module_tree.heading("name", text="Name")
+        self.module_tree.heading("status", text="Status")
 
         self.module_tree.bind(
             "<<TreeviewSelect>>",
@@ -178,14 +171,22 @@ class Dashboard:
             pady=(10, 0)
         )
 
-        self.exam_results_label = tk.Label(
+        self.exam_results_tree = ttk.Treeview(
             results_frame,
-            text="Kein Modul ausgewählt.",
-            anchor="w",
-            justify="left"
+            columns=("exam_type", "grade", "status"),
+            show="headings",
+            height=4
         )
-        self.exam_results_label.pack(
-            fill="x"
+        self.exam_results_tree.heading("exam_type", text="Prüfungsart")
+        self.exam_results_tree.heading("grade", text="Note")
+        self.exam_results_tree.heading("status", text="Status")
+        self.exam_results_tree.pack(
+            fill="x",
+            pady=(0, 10)
+        )
+        self.exam_results_tree.bind(
+            "<<TreeviewSelect>>",
+            self.on_exam_result_selected
         )
 
         self.update_dashboard()
@@ -255,8 +256,8 @@ class Dashboard:
                 module_item = self.module_tree.insert(
                     semester_item,
                     "end",
+                    text=module.module_number,
                     values=(
-                        module.module_number,
                         module.name,
                         status
                     )
@@ -279,25 +280,27 @@ class Dashboard:
 
         self.show_exam_results(module)
 
-    def show_exam_results(self, module):
-        if not module.exam_results:
-            self.exam_results_label.config(
-                text=f"{module.name}\nNoch keine Prüfungsleistungen vorhanden."
-            )
-            return
 
-        result_lines = []
+    def show_exam_results(self, module):
+        self.selected_module = module
+
+        for item in self.exam_results_tree.get_children():
+            self.exam_results_tree.delete(item)
+
+        self.exam_result_items.clear()
 
         for result in module.exam_results:
-            result_lines.append(
-                f"{result.exam_type.value}: {result.grade:.1f}"
+            item = self.exam_results_tree.insert(
+                "",
+                "end",
+                values=(
+                    result.exam_type.value,
+                    f"{result.grade:.1f}",
+                    "Bestanden" if result.is_passed else "Nicht bestanden"
+                )
             )
 
-        text = f"{module.name}\n" + "\n".join(result_lines)
-
-        self.exam_results_label.config(
-            text=text
-        )
+            self.exam_result_items[item] = result
 
     def on_set_target_average(self):
         try:
@@ -319,6 +322,21 @@ class Dashboard:
             return
 
         self.update_target_display()
+
+    def on_exam_result_selected(self, event):
+        selected_items = self.exam_results_tree.selection()
+
+        if not selected_items:
+            return
+
+        selected_item = selected_items[0]
+
+        values = self.exam_results_tree.item(
+            selected_item,
+            "values"
+        )
+
+        print(values)
 
     def show(self):
         self.root.mainloop()
