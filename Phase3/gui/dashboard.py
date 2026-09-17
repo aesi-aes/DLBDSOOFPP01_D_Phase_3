@@ -3,6 +3,9 @@ import tkinter as tk
 from controllers.dashboard_controller import DashboardController
 from tkinter import messagebox, ttk
 
+from models.exam_type import ExamType
+
+
 class Dashboard:
     def __init__(self, controller: DashboardController):
         self.module_tree = None
@@ -11,6 +14,15 @@ class Dashboard:
         self.selected_module = None
         self.exam_results_tree = None
         self.exam_result_items = {}
+
+        self.new_result_button = None
+        self.edit_result_button = None
+        self.save_result_button = None
+        self.editing_exam_result = None
+
+        self.exam_type_combobox = None
+        self.target_status_label = None
+        self.grade_entry = None
 
         self.target_average_label = None
         self.study_progress_label = None
@@ -189,6 +201,78 @@ class Dashboard:
             self.on_exam_result_selected
         )
 
+        # Prüfungsergebnis bearbeiten
+        button_frame = tk.Frame(results_frame)
+        button_frame.pack(fill="x")
+
+        self.new_result_button = tk.Button(
+            button_frame,
+            text="Neues Ergebnis",
+            command=self.on_new_exam_result
+        )
+        self.new_result_button.pack(side="left")
+
+        self.edit_result_button = tk.Button(
+            button_frame,
+            text="Bearbeiten",
+            command=self.on_edit_exam_result
+        )
+        self.edit_result_button.pack(side="left", padx=(10, 0))
+
+        editor_frame = tk.LabelFrame(
+            results_frame,
+            text="PRÜFUNGSERGEBNIS BEARBEITEN",
+            padx=10,
+            pady=10
+        )
+        editor_frame.pack(fill="x", pady=(10, 0))
+
+        tk.Label(
+            editor_frame,
+            text="Prüfungsart:"
+        ).grid(row=0, column=0, sticky="w", padx=(0, 10))
+
+        self.exam_type_combobox = ttk.Combobox(
+            editor_frame,
+            values=[
+                exam_type.value
+                for exam_type in ExamType
+            ],
+            state="readonly"
+        )
+        self.exam_type_combobox.grid(
+            row=0,
+            column=1,
+            sticky="ew"
+        )
+
+        tk.Label(
+            editor_frame,
+            text="Note:"
+        ).grid(row=1, column=0, sticky="w", padx=(0, 10), pady=(10, 0))
+
+        self.grade_entry = tk.Entry(editor_frame)
+        self.grade_entry.grid(
+            row=1,
+            column=1,
+            sticky="ew",
+            pady=(10, 0)
+        )
+
+        editor_frame.columnconfigure(1, weight=1)
+
+        self.save_result_button = tk.Button(
+            editor_frame,
+            text="Speichern",
+            command=self.on_save_exam_result
+        )
+        self.save_result_button.grid(
+            row=2,
+            column=1,
+            sticky="e",
+            pady=(10, 0)
+        )
+
         self.update_dashboard()
 
     def update_dashboard(self):
@@ -280,7 +364,6 @@ class Dashboard:
 
         self.show_exam_results(module)
 
-
     def show_exam_results(self, module):
         self.selected_module = module
 
@@ -331,12 +414,39 @@ class Dashboard:
 
         selected_item = selected_items[0]
 
-        values = self.exam_results_tree.item(
-            selected_item,
-            "values"
+        self.editing_exam_result = self.exam_result_items.get(selected_item)
+
+        if self.editing_exam_result is None:
+            return
+
+        self.exam_type_combobox.set(
+            self.editing_exam_result.exam_type.value
         )
 
-        print(values)
+        self.grade_entry.delete(0, tk.END)
+        self.grade_entry.insert(
+            0,
+            str(self.editing_exam_result.grade)
+        )
+
+    def on_new_exam_result(self):
+        if self.selected_module is None:
+            messagebox.showinfo(
+                "Kein Modul ausgewählt",
+                "Bitte wähle zuerst ein Modul aus."
+            )
+            return
+
+        self.editing_exam_result = None
+
+        self.exam_type_combobox.set("")
+        self.grade_entry.delete(0, tk.END)
+
+    def on_edit_exam_result(self):
+        print("Ergebnis bearbeiten")
+
+    def on_save_exam_result(self):
+        print("Ergebnis speichern")
 
     def show(self):
         self.root.mainloop()
