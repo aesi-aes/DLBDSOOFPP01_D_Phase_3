@@ -27,6 +27,7 @@ class Dashboard:
         self.grade_entry = None
 
         self.target_average_label = None
+        self.average_label = None
         self.study_progress_label = None
         self.target_entry = None
         self.controller = controller
@@ -316,6 +317,14 @@ class Dashboard:
         )
 
     def update_module_tree(self):
+        # "Geöffnete" Einträge merken.
+        open_semesters = set()
+        for item in self.module_tree.get_children():
+            if self.module_tree.item(item, "open"):
+                open_semesters.add(
+                    self.module_tree.item(item, "text")
+                )
+
         # Alte Listeneinträge entfernen
         for item in self.module_tree.get_children():
             self.module_tree.delete(item)
@@ -326,10 +335,12 @@ class Dashboard:
         semesters = self.controller.study_service.get_semesters()
 
         for semester in semesters:
+            # Neuer Semester-Eintrag (geöffnet falls in open_semesters)
             semester_item = self.module_tree.insert(
                 "",
                 "end",
-                text=semester.name
+                text=semester.name,
+                open=semester.name in open_semesters
             )
 
             # Module anzeigen
@@ -451,6 +462,11 @@ class Dashboard:
             return
 
         self.editing_exam_result = None
+        self.clear_exam_result_editor()
+
+        self.exam_results_tree.selection_remove(
+            self.exam_results_tree.selection()
+        )
 
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
