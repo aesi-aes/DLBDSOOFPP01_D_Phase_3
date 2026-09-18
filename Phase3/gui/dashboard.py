@@ -21,6 +21,7 @@ class Dashboard:
         self.delete_result_button = None
         self.save_result_button = None
         self.editing_exam_result = None
+        self.is_creating_exam_result = False
 
         self.exam_type_combobox = None
         self.target_status_label = None
@@ -283,6 +284,7 @@ class Dashboard:
         self.update_average()
         self.update_target_display()
         self.update_module_tree()
+        self.update_exam_result_controls()
 
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
@@ -367,10 +369,40 @@ class Dashboard:
                     self.module_tree.selection_set(module_item)
                     self.module_tree.focus(module_item)
 
+    def update_exam_result_controls(self):
+        # Was ist selektiert?
+        has_module = self.selected_module is not None
+        has_result = self.editing_exam_result is not None
+        editor_active = has_result or self.is_creating_exam_result
+
+        # Buttons de/aktivieren.
+        self.new_result_button.config(
+            state="normal" if has_module else "disabled"
+        )
+        self.delete_result_button.config(
+            state="normal" if has_result else "disabled"
+        )
+
+        # Ergebnis-Editor nur editierbar wenn ein ExamResult bearbeitet wird.
+        self.exam_type_combobox.config(
+            state="readonly" if editor_active else "disabled"
+        )
+        self.grade_entry.config(
+            state="normal" if editor_active else "disabled"
+        )
+        self.save_result_button.config(
+            state="normal" if editor_active else "disabled"
+        )
+
     def on_module_selected(self, event):
         selected_items = self.module_tree.selection()
 
         if not selected_items:
+            self.selected_module = None
+            self.editing_exam_result = None
+            self.is_creating_exam_result = False
+            self.clear_exam_result_editor()
+            self.update_exam_result_controls()
             return
 
         selected_item = selected_items[0]
@@ -380,16 +412,24 @@ class Dashboard:
         if module is None:
             return
 
+        self.selected_module = module
         self.show_exam_results(module)
 
     def show_exam_results(self, module):
         self.selected_module = module
 
+        # Bearbeiten-Status zurücksetzen
+        self.editing_exam_result = None
+        self.is_creating_exam_result = False
+
+        # alle Einträge löschen
         for item in self.exam_results_tree.get_children():
             self.exam_results_tree.delete(item)
 
+        # alle Items löschen
         self.exam_result_items.clear()
 
+        # neue Einträge erstellen
         for result in module.exam_results:
             item = self.exam_results_tree.insert(
                 "",
@@ -403,13 +443,17 @@ class Dashboard:
 
             self.exam_result_items[item] = result
 
+        # UI-Elemente zurücksetzen
         self.clear_exam_result_editor()
+        self.update_exam_result_controls()
 
     def clear_exam_result_editor(self):
+        # Ergebnis-Editor zurücksetzen
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
 
     def on_set_target_average(self):
+        # float-Zahl soll abgefragt werden, falls nicht: Fehlermeldung
         try:
             target_average = float(self.target_entry.get())
         except ValueError:
@@ -419,6 +463,7 @@ class Dashboard:
             )
             return
 
+        # falls Zahl nicht zwischen 1-6
         try:
             self.controller.on_target_average_changed(target_average)
         except ValueError as error:
@@ -434,14 +479,21 @@ class Dashboard:
         selected_items = self.exam_results_tree.selection()
 
         if not selected_items:
+            self.editing_exam_result = None
+            # self.is_creating_exam_result = False
+            self.clear_exam_result_editor()
+            self.update_exam_result_controls()
             return
 
         selected_item = selected_items[0]
 
-        self.editing_exam_result = self.exam_result_items.get(selected_item)
+        result = self.exam_result_items.get(selected_item)
 
-        if self.editing_exam_result is None:
+        if result is None:
             return
+
+        self.editing_exam_result = result
+        self.is_creating_exam_result = False
 
         self.exam_type_combobox.set(
             self.editing_exam_result.exam_type.value
@@ -453,15 +505,15 @@ class Dashboard:
             str(self.editing_exam_result.grade)
         )
 
+        self.update_exam_result_controls()
+
     def on_new_exam_result(self):
         if self.selected_module is None:
-            messagebox.showinfo(
-                "Kein Modul ausgewählt",
-                "Bitte wähle zuerst ein Modul aus."
-            )
             return
 
         self.editing_exam_result = None
+        self.is_creating_exam_result = True
+
         self.clear_exam_result_editor()
 
         self.exam_results_tree.selection_remove(
@@ -526,6 +578,9 @@ class Dashboard:
             return
 
         self.show_exam_results(self.selected_module)
+        self.editing_exam_result = None
+        self.is_creating_exam_result = False
+        self.clear_exam_result_editor()
         self.update_dashboard()
 
     def on_delete_exam_result(self):
