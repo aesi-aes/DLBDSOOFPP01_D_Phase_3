@@ -175,6 +175,8 @@ class ModuleList(tk.LabelFrame):
                     self.module_tree.selection_set(module_item)
                     self.module_tree.focus(module_item)
 
+        self.update_controls()
+
     def on_tree_selection_changed(self, event):
         # Selektion
         selected_items = self.module_tree.selection()
