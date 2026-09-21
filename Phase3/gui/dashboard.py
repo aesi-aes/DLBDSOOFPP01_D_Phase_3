@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from controllers.dashboard_controller import DashboardController
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 
 from gui.exam_result_editor import ExamResultEditor
 from gui.exam_results import ExamResults
@@ -17,7 +17,6 @@ class Dashboard:
         self.exam_result_editor = None
 
         self.target_status_label = None
-
         self.target_average_label = None
         self.average_label = None
         self.study_progress_label = None
@@ -133,15 +132,8 @@ class Dashboard:
         )
         self.target_status_label.pack(pady=(10, 0))
 
-        modules_container = tk.Frame(main_frame)
-        modules_container.pack(
-            fill="both",
-            expand=True,
-            pady=(20, 0)
-        )
-
         # Liste der Module
-        self.module_list = ModuleList(modules_container, self.controller, self.on_module_selected)
+        self.module_list = ModuleList(main_frame, self.controller, self.on_module_selected)
         self.module_list.pack(
             fill="both",
             expand=True,
@@ -150,7 +142,7 @@ class Dashboard:
 
         # Prüfungsergebnisse.
         self.exam_results = ExamResults(
-            modules_container,
+            main_frame,
             self.controller,
             on_result_selected=self.on_exam_result_selected,
             on_new_result=self.on_new_exam_result,
@@ -161,26 +153,9 @@ class Dashboard:
             pady=(10, 0)
         )
 
-        exam_result_content_frame = tk.Frame(
-            modules_container
-        )
-        exam_result_content_frame.pack(
-            fill="x",
-            pady=(0, 10)
-        )
-
-        # Prüfungsergebnis bearbeiten
-        exam_result_button_frame = tk.Frame(
-            exam_result_content_frame
-        )
-        exam_result_button_frame.pack(
-            side="right",
-            fill="y",
-            padx=(10, 0)
-        )
-
+        # Ergebnis-Editor.
         self.exam_result_editor = ExamResultEditor(
-            modules_container,
+            main_frame,
             on_save=self.on_save_exam_result
         )
         self.exam_result_editor.pack(
@@ -189,9 +164,6 @@ class Dashboard:
         )
 
         self.update_dashboard()
-
-    def get_selected_module(self):
-        return self.module_list.selected_module
 
     def update_dashboard(self):
         self.update_study_progress()
@@ -228,26 +200,9 @@ class Dashboard:
             text=status_text
         )
 
-    def update_exam_result_controls(self):
-        self.exam_results.update_controls()
-        self.exam_result_editor.update()
-
     def on_module_selected(self, module):
-        if module is None:
-            self.exam_results.update(None)
-
-            self.clear_exam_result_editor()
-            self.update_exam_result_controls()
-            return
-
         self.exam_results.update(module)
-
-        self.clear_exam_result_editor()
-        self.update_exam_result_controls()
-
-    def clear_exam_result_editor(self):
-        # Ergebnis-Editor zurücksetzen
-        self.exam_result_editor.clear()
+        self.exam_result_editor.update()
 
     def on_set_target_average(self):
         # float-Zahl soll abgefragt werden, falls nicht: Fehlermeldung
@@ -330,7 +285,6 @@ class Dashboard:
 
         # UI aktualisieren
         self.exam_result_editor.update()
-        self.exam_results.update(module)
         self.update_dashboard()
 
     def show(self):
