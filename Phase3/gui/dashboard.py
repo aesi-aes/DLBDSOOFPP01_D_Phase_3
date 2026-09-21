@@ -3,6 +3,7 @@ import tkinter as tk
 from controllers.dashboard_controller import DashboardController
 from tkinter import messagebox, ttk, simpledialog
 
+from gui.module_list import ModuleList
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
 from models.semester import Semester
@@ -10,18 +11,10 @@ from models.semester import Semester
 
 class Dashboard:
     def __init__(self, controller: DashboardController):
-        self.module_tree = None
-        self.tree_items = {}
-        self.semester_items = {}
+        self.module_list = None
 
-        self.selected_module = None
         self.exam_results_tree = None
         self.exam_result_items = {}
-
-        self.new_semester_button = None
-        self.delete_semester_button = None
-        self.set_current_semester_button = None
-        self.selected_semester = None
 
         self.new_result_button = None
         self.delete_result_button = None
@@ -149,87 +142,16 @@ class Dashboard:
         self.target_status_label.pack(pady=(10, 0))
 
         # Liste der Module
-        modules_frame = tk.LabelFrame(
-            main_frame,
-            text="MODULE",
-            padx=10,
-            pady=10
-        )
-        modules_frame.pack(
+        self.module_list = ModuleList(main_frame, self.controller, self.on_module_selected)
+        self.module_list.pack(
             fill="both",
             expand=True,
             pady=(20, 0)
         )
 
-        module_content_frame = tk.Frame(modules_frame)
-        module_content_frame.pack(
-            fill="both",
-            expand=True
-        )
-
-        self.module_tree = ttk.Treeview(
-            module_content_frame,
-            columns=("name", "status"),
-            show="tree headings"
-        )
-
-        self.module_tree.heading("#0", text="Modul")
-        self.module_tree.heading("name", text="Name")
-        self.module_tree.heading("status", text="Status")
-
-        self.module_tree.bind(
-            "<<TreeviewSelect>>",
-            self.on_module_selected
-        )
-
-        self.module_tree.pack(
-            side="left",
-            fill="both",
-            expand=True
-        )
-
-        # Semester-Buttons
-        semester_button_frame = tk.Frame(
-            module_content_frame
-        )
-        semester_button_frame.pack(
-            side="right",
-            fill="y",
-            padx=(10, 0)
-        )
-
-        self.set_current_semester_button = tk.Button(
-            semester_button_frame,
-            text="Aktuelles\nSemester",
-            command=self.on_set_current_semester
-        )
-        self.set_current_semester_button.pack(
-            fill="x"
-        )
-
-        self.new_semester_button = tk.Button(
-            semester_button_frame,
-            text="Neues\nSemester",
-            command=self.on_new_semester
-        )
-        self.new_semester_button.pack(
-            fill="x",
-            pady=(10, 0)
-        )
-
-        self.delete_semester_button = tk.Button(
-            semester_button_frame,
-            text="Semester\nlöschen",
-            command=self.on_delete_semester
-        )
-        self.delete_semester_button.pack(
-            fill="x",
-            pady=(10, 0)
-        )
-
         # Prüfungsergebnisse.
         results_frame = tk.LabelFrame(
-            modules_frame,
+            main_frame,
             text="PRÜFUNGSERGEBNISSE",
             padx=10,
             pady=10
@@ -347,13 +269,15 @@ class Dashboard:
 
         self.update_dashboard()
 
+    def get_selected_module(self):
+        return self.module_list.selected_module
+
     def update_dashboard(self):
         self.update_study_progress()
         self.update_average()
         self.update_target_display()
-        self.update_module_tree()
+        self.module_list.update()
         self.update_exam_result_controls()
-        self.update_semester_controls()
 
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
@@ -444,7 +368,7 @@ class Dashboard:
                 self.tree_items[module_item] = module
 
                 # Letztes ausgewähltes Modul wieder auswählen
-                if module == self.selected_module:
+                if module == self.module_list.selected_module:
                     self.module_tree.selection_set(module_item)
                     self.module_tree.focus(module_item)
 
@@ -461,7 +385,7 @@ class Dashboard:
 
     def update_exam_result_controls(self):
         # Was ist selektiert?
-        has_module = self.selected_module is not None
+        has_module = self.module_list.selected_module is not None
         has_result = self.editing_exam_result is not None
         editor_active = has_result or self.is_creating_exam_result
 
@@ -484,119 +408,19 @@ class Dashboard:
             state="normal" if editor_active else "disabled"
         )
 
-    def on_module_selected(self, event):
-        selected_items = self.module_tree.selection()
-
-        if not selected_items:
-            self.selected_module = None
-            self.selected_semester = None
-            self.editing_exam_result = None
-            self.is_creating_exam_result = False
-            self.clear_exam_result_editor()
-            self.update_exam_result_controls()
-            self.update_semester_controls()
-            return
-
-        selected_item = selected_items[0]
-
-        semester = self.semester_items.get(selected_item)
-        if semester is not None:
-            self.selected_semester = semester
-            self.selected_module = None
-            self.editing_exam_result = None
-            self.is_creating_exam_result = False
-            self.clear_exam_result_editor()
-            self.clear_exam_results()
-            self.update_exam_result_controls()
-            self.update_semester_controls()
-            return
-
-        module = self.tree_items.get(selected_item)
+    def on_module_selected(self, module):
         if module is None:
-            self.selected_semester = None
+            self.clear_exam_results()
+            self.editing_exam_result = None
+            self.is_creating_exam_result = False
+            self.clear_exam_result_editor()
+            self.update_exam_result_controls()
             return
 
-        self.selected_module = module
-        self.selected_semester = None
         self.show_exam_results(module)
-        self.update_semester_controls()
-
-    def on_set_current_semester(self):
-        selected_items = self.module_tree.selection()
-
-        if not selected_items:
-            return
-
-        selected_item = selected_items[0]
-
-        semester = self.semester_items.get(selected_item)
-        if semester is None:
-            return
-
-        self.controller.on_current_semester_changed(semester)
-
-        self.update_dashboard()
-
-    def on_new_semester(self):
-        name = simpledialog.askstring(
-            "Neues Semester",
-            "Name des Semesters:"
-        )
-
-        if name is None:
-            return
-
-        name = name.strip()
-
-        if not name:
-            messagebox.showerror(
-                "Ungültige Eingabe",
-                "Der Semestername darf nicht leer sein."
-            )
-            return
-
-        semester = Semester(name=name)
-
-        self.controller.on_semester_added(semester)
-
-        self.update_dashboard()
-
-    def on_delete_semester(self):
-        if self.selected_semester is None:
-            return
-
-        semester = self.selected_semester
-
-        confirmed = messagebox.askyesno(
-            "Semester löschen",
-            f"Möchtest du '{semester.name}' wirklich löschen?\n\n"
-            "Alle Module und Prüfungsergebnisse dieses Semesters "
-            "werden ebenfalls gelöscht."
-        )
-
-        if not confirmed:
-            return
-
-        try:
-            self.controller.on_semester_deleted(semester)
-        except ValueError as error:
-            messagebox.showerror(
-                "Semester kann nicht gelöscht werden",
-                str(error)
-            )
-            return
-
-        self.selected_semester = None
-        self.selected_module = None
-        self.editing_exam_result = None
-        self.is_creating_exam_result = False
-
-        self.clear_exam_result_editor()
-        self.update_dashboard()
-        self.update_semester_controls()
 
     def show_exam_results(self, module):
-        self.selected_module = module
+        self.module_list.selected_module = module
 
         # Bearbeiten-Status zurücksetzen
         self.editing_exam_result = None
@@ -695,7 +519,7 @@ class Dashboard:
         self.update_exam_result_controls()
 
     def on_new_exam_result(self):
-        if self.selected_module is None:
+        if self.module_list.selected_module is None:
             return
 
         self.editing_exam_result = None
@@ -707,7 +531,7 @@ class Dashboard:
         self.exam_type_combobox.focus_set()
 
     def on_save_exam_result(self):
-        if self.selected_module is None:
+        if self.module_list.selected_module is None:
             messagebox.showinfo(
                 "Kein Modul ausgewählt",
                 "Bitte wähle zuerst ein Modul aus."
@@ -742,7 +566,7 @@ class Dashboard:
                 )
 
                 self.controller.on_exam_result_added(
-                    self.selected_module,
+                    self.module_list.selected_module,
                     exam_result
                 )
             else:
@@ -759,14 +583,14 @@ class Dashboard:
             )
             return
 
-        self.show_exam_results(self.selected_module)
+        self.show_exam_results(self.module_list.selected_module)
         self.editing_exam_result = None
         self.is_creating_exam_result = False
         self.clear_exam_result_editor()
         self.update_dashboard()
 
     def on_delete_exam_result(self):
-        if self.selected_module is None:
+        if self.module_list.selected_module is None:
             messagebox.showinfo(
                 "Kein Modul ausgewählt",
                 "Bitte wähle zuerst ein Modul aus."
@@ -798,11 +622,11 @@ class Dashboard:
             return
 
         self.controller.on_exam_result_deleted(
-            self.selected_module,
+            self.module_list.selected_module,
             result
         )
 
-        self.show_exam_results(self.selected_module)
+        self.show_exam_results(self.module_list.selected_module)
 
         self.editing_exam_result = None
         self.exam_type_combobox.set("")
