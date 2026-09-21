@@ -41,6 +41,11 @@ class StudyService:
     def get_current_semester(self) -> int:
         return self.degree_program.current_semester
 
+    def set_current_semester(self, semester: Semester):
+        semester_index = self.degree_program.semesters.index(semester)
+
+        self.degree_program.current_semester = semester_index + 1
+
     def get_modules(self) -> list[Module]:
         modules = []
 
@@ -51,3 +56,30 @@ class StudyService:
 
     def get_semesters(self) -> list[Semester]:
         return self.degree_program.semesters
+
+    def add_semester(self, semester: Semester):
+        self.degree_program.semesters.append(semester)
+
+    def delete_semester(self, semester: Semester):
+        if len(self.degree_program.semesters) <= 1:
+            raise ValueError(
+                "DegreeProgram: Es muss mindestens ein Semester geben!"
+            )
+
+        semester_index = self.degree_program.semesters.index(semester)
+        current_index = self.degree_program.current_semester - 1
+
+        self.degree_program.semesters.remove(semester)
+
+        # Wenn ein Semester 'vor' dem aktuellen gelöscht wird,
+        # current_semester um -1 shiften.
+        if semester_index < current_index:
+            self.degree_program.current_semester -= 1
+
+        # Wenn das aktuelle Semester gelöscht wird, selbe Index
+        # oder den letzten Index.
+        elif semester_index == current_index:
+            self.degree_program.current_semester = min(
+                self.degree_program.current_semester,
+                len(self.degree_program.semesters)
+            )

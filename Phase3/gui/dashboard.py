@@ -1,21 +1,27 @@
 import tkinter as tk
 
 from controllers.dashboard_controller import DashboardController
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, simpledialog
 
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
-from models.module import Module
+from models.semester import Semester
 
 
 class Dashboard:
     def __init__(self, controller: DashboardController):
         self.module_tree = None
         self.tree_items = {}
+        self.semester_items = {}
 
         self.selected_module = None
         self.exam_results_tree = None
         self.exam_result_items = {}
+
+        self.new_semester_button = None
+        self.delete_semester_button = None
+        self.set_current_semester_button = None
+        self.selected_semester = None
 
         self.new_result_button = None
         self.delete_result_button = None
@@ -155,8 +161,14 @@ class Dashboard:
             pady=(20, 0)
         )
 
+        module_content_frame = tk.Frame(modules_frame)
+        module_content_frame.pack(
+            fill="both",
+            expand=True
+        )
+
         self.module_tree = ttk.Treeview(
-            modules_frame,
+            module_content_frame,
             columns=("name", "status"),
             show="tree headings"
         )
@@ -171,8 +183,48 @@ class Dashboard:
         )
 
         self.module_tree.pack(
+            side="left",
             fill="both",
             expand=True
+        )
+
+        # Semester-Buttons
+        semester_button_frame = tk.Frame(
+            module_content_frame
+        )
+        semester_button_frame.pack(
+            side="right",
+            fill="y",
+            padx=(10, 0)
+        )
+
+        self.set_current_semester_button = tk.Button(
+            semester_button_frame,
+            text="Aktuelles\nSemester",
+            command=self.on_set_current_semester
+        )
+        self.set_current_semester_button.pack(
+            fill="x"
+        )
+
+        self.new_semester_button = tk.Button(
+            semester_button_frame,
+            text="Neues\nSemester",
+            command=self.on_new_semester
+        )
+        self.new_semester_button.pack(
+            fill="x",
+            pady=(10, 0)
+        )
+
+        self.delete_semester_button = tk.Button(
+            semester_button_frame,
+            text="Semester\nlöschen",
+            command=self.on_delete_semester
+        )
+        self.delete_semester_button.pack(
+            fill="x",
+            pady=(10, 0)
         )
 
         # Prüfungsergebnisse.
@@ -187,8 +239,16 @@ class Dashboard:
             pady=(10, 0)
         )
 
+        exam_result_content_frame = tk.Frame(
+            results_frame
+        )
+        exam_result_content_frame.pack(
+            fill="x",
+            pady=(0, 10)
+        )
+
         self.exam_results_tree = ttk.Treeview(
-            results_frame,
+            exam_result_content_frame,
             columns=("exam_type", "grade", "status"),
             show="headings",
             height=4
@@ -197,47 +257,55 @@ class Dashboard:
         self.exam_results_tree.heading("grade", text="Note")
         self.exam_results_tree.heading("status", text="Status")
         self.exam_results_tree.pack(
+            side="left",
             fill="x",
-            pady=(0, 10)
+            expand=True
         )
+
         self.exam_results_tree.bind(
             "<<TreeviewSelect>>",
             self.on_exam_result_selected
         )
 
         # Prüfungsergebnis bearbeiten
-        button_frame = tk.Frame(results_frame)
-        button_frame.pack(fill="x")
+        exam_result_button_frame = tk.Frame(
+            exam_result_content_frame
+        )
+        exam_result_button_frame.pack(
+            side="right",
+            fill="y",
+            padx=(10, 0)
+        )
 
         self.new_result_button = tk.Button(
-            button_frame,
-            text="Neues Ergebnis",
+            exam_result_button_frame,
+            text="Neues\nErgebnis",
             command=self.on_new_exam_result
         )
-        self.new_result_button.pack(side="left")
+        self.new_result_button.pack(fill="x")
 
         self.delete_result_button = tk.Button(
-            button_frame,
-            text="Ergebnis löschen",
+            exam_result_button_frame,
+            text="Ergebnis\nlöschen",
             command=self.on_delete_exam_result
         )
-        self.delete_result_button.pack(side="left", padx=(10, 0))
+        self.delete_result_button.pack(fill="x", pady=(10, 0))
 
-        editor_frame = tk.LabelFrame(
+        exam_result_editor_frame = tk.LabelFrame(
             results_frame,
             text="PRÜFUNGSERGEBNIS BEARBEITEN",
             padx=10,
             pady=10
         )
-        editor_frame.pack(fill="x", pady=(10, 0))
+        exam_result_editor_frame.pack(fill="x", pady=(10, 0))
 
         tk.Label(
-            editor_frame,
+            exam_result_editor_frame,
             text="Prüfungsart:"
         ).grid(row=0, column=0, sticky="w", padx=(0, 10))
 
         self.exam_type_combobox = ttk.Combobox(
-            editor_frame,
+            exam_result_editor_frame,
             values=[
                 exam_type.value
                 for exam_type in ExamType
@@ -251,11 +319,11 @@ class Dashboard:
         )
 
         tk.Label(
-            editor_frame,
+            exam_result_editor_frame,
             text="Note:"
         ).grid(row=1, column=0, sticky="w", padx=(0, 10), pady=(10, 0))
 
-        self.grade_entry = tk.Entry(editor_frame)
+        self.grade_entry = tk.Entry(exam_result_editor_frame)
         self.grade_entry.grid(
             row=1,
             column=1,
@@ -263,10 +331,10 @@ class Dashboard:
             pady=(10, 0)
         )
 
-        editor_frame.columnconfigure(1, weight=1)
+        exam_result_editor_frame.columnconfigure(1, weight=1)
 
         self.save_result_button = tk.Button(
-            editor_frame,
+            exam_result_editor_frame,
             text="Speichern",
             command=self.on_save_exam_result
         )
@@ -285,6 +353,7 @@ class Dashboard:
         self.update_target_display()
         self.update_module_tree()
         self.update_exam_result_controls()
+        self.update_semester_controls()
 
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
@@ -336,13 +405,23 @@ class Dashboard:
 
         semesters = self.controller.study_service.get_semesters()
 
-        for semester in semesters:
+        for index, semester in enumerate(semesters, start=1):
             # Neuer Semester-Eintrag (geöffnet falls in open_semesters)
             semester_item = self.module_tree.insert(
                 "",
                 "end",
                 text=semester.name,
-                open=semester.name in open_semesters
+                open=semester.name in open_semesters,
+                tags=("current_semester",)
+                if index == self.controller.study_service.get_current_semester()
+                else ()
+            )
+
+            self.semester_items[semester_item] = semester
+
+            self.module_tree.tag_configure(
+                "current_semester",
+                font=("TkDefaultFont", 10, "bold")
             )
 
             # Module anzeigen
@@ -368,6 +447,17 @@ class Dashboard:
                 if module == self.selected_module:
                     self.module_tree.selection_set(module_item)
                     self.module_tree.focus(module_item)
+
+    def update_semester_controls(self):
+        has_semester = self.selected_semester is not None
+
+        self.set_current_semester_button.config(
+            state="normal" if has_semester else "disabled"
+        )
+
+        self.delete_semester_button.config(
+            state="normal" if has_semester else "disabled"
+        )
 
     def update_exam_result_controls(self):
         # Was ist selektiert?
@@ -399,21 +489,111 @@ class Dashboard:
 
         if not selected_items:
             self.selected_module = None
+            self.selected_semester = None
             self.editing_exam_result = None
             self.is_creating_exam_result = False
             self.clear_exam_result_editor()
             self.update_exam_result_controls()
+            self.update_semester_controls()
             return
 
         selected_item = selected_items[0]
 
-        module = self.tree_items.get(selected_item)
+        semester = self.semester_items.get(selected_item)
+        if semester is not None:
+            self.selected_semester = semester
+            self.selected_module = None
+            self.editing_exam_result = None
+            self.is_creating_exam_result = False
+            self.clear_exam_result_editor()
+            self.clear_exam_results()
+            self.update_exam_result_controls()
+            self.update_semester_controls()
+            return
 
+        module = self.tree_items.get(selected_item)
         if module is None:
+            self.selected_semester = None
             return
 
         self.selected_module = module
+        self.selected_semester = None
         self.show_exam_results(module)
+        self.update_semester_controls()
+
+    def on_set_current_semester(self):
+        selected_items = self.module_tree.selection()
+
+        if not selected_items:
+            return
+
+        selected_item = selected_items[0]
+
+        semester = self.semester_items.get(selected_item)
+        if semester is None:
+            return
+
+        self.controller.on_current_semester_changed(semester)
+
+        self.update_dashboard()
+
+    def on_new_semester(self):
+        name = simpledialog.askstring(
+            "Neues Semester",
+            "Name des Semesters:"
+        )
+
+        if name is None:
+            return
+
+        name = name.strip()
+
+        if not name:
+            messagebox.showerror(
+                "Ungültige Eingabe",
+                "Der Semestername darf nicht leer sein."
+            )
+            return
+
+        semester = Semester(name=name)
+
+        self.controller.on_semester_added(semester)
+
+        self.update_dashboard()
+
+    def on_delete_semester(self):
+        if self.selected_semester is None:
+            return
+
+        semester = self.selected_semester
+
+        confirmed = messagebox.askyesno(
+            "Semester löschen",
+            f"Möchtest du '{semester.name}' wirklich löschen?\n\n"
+            "Alle Module und Prüfungsergebnisse dieses Semesters "
+            "werden ebenfalls gelöscht."
+        )
+
+        if not confirmed:
+            return
+
+        try:
+            self.controller.on_semester_deleted(semester)
+        except ValueError as error:
+            messagebox.showerror(
+                "Semester kann nicht gelöscht werden",
+                str(error)
+            )
+            return
+
+        self.selected_semester = None
+        self.selected_module = None
+        self.editing_exam_result = None
+        self.is_creating_exam_result = False
+
+        self.clear_exam_result_editor()
+        self.update_dashboard()
+        self.update_semester_controls()
 
     def show_exam_results(self, module):
         self.selected_module = module
@@ -423,11 +603,7 @@ class Dashboard:
         self.is_creating_exam_result = False
 
         # alle Einträge löschen
-        for item in self.exam_results_tree.get_children():
-            self.exam_results_tree.delete(item)
-
-        # alle Items löschen
-        self.exam_result_items.clear()
+        self.clear_exam_results()
 
         # neue Einträge erstellen
         for result in module.exam_results:
@@ -451,6 +627,14 @@ class Dashboard:
         # Ergebnis-Editor zurücksetzen
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
+
+    def clear_exam_results(self):
+        # alle Einträge löschen
+        for item in self.exam_results_tree.get_children():
+            self.exam_results_tree.delete(item)
+
+        # alle Items löschen
+        self.exam_result_items.clear()
 
     def on_set_target_average(self):
         # float-Zahl soll abgefragt werden, falls nicht: Fehlermeldung

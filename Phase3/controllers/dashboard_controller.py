@@ -1,6 +1,7 @@
 from models.exam_result import ExamResult
 from models.exam_type import ExamType
 from models.module import Module
+from models.semester import Semester
 
 from services.study_service import StudyService
 from services.grade_service import GradeService
@@ -43,6 +44,15 @@ class DashboardController:
         self.grade_service.set_target_average(
             target_average
         )
+
+    def on_current_semester_changed(self, semester: Semester):
+        self.study_service.set_current_semester(semester)
+
+    def on_semester_added(self, semester: Semester):
+        self.study_service.add_semester(semester)
+
+    def on_semester_deleted(self, semester: Semester):
+        self.study_service.delete_semester(semester)
 
     def update_exam_result(
         self,
