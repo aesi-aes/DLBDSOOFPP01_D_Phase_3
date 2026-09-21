@@ -476,11 +476,14 @@ class Dashboard:
         self.update_target_display()
 
     def on_exam_result_selected(self, event):
+        if self.is_creating_exam_result:
+            return
+
         selected_items = self.exam_results_tree.selection()
 
         if not selected_items:
             self.editing_exam_result = None
-            # self.is_creating_exam_result = False
+            self.is_creating_exam_result = False
             self.clear_exam_result_editor()
             self.update_exam_result_controls()
             return
@@ -515,14 +518,9 @@ class Dashboard:
         self.is_creating_exam_result = True
 
         self.clear_exam_result_editor()
+        self.update_exam_result_controls()
 
-        self.exam_results_tree.selection_remove(
-            self.exam_results_tree.selection()
-        )
-
-        self.exam_type_combobox.set("")
-        self.grade_entry.delete(0, tk.END)
-        self.update_dashboard()
+        self.exam_type_combobox.focus_set()
 
     def on_save_exam_result(self):
         if self.selected_module is None:
