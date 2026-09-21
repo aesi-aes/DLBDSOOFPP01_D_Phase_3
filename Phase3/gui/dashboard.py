@@ -16,9 +16,6 @@ class Dashboard:
         self.exam_results = None
         self.exam_result_editor = None
 
-        self.editing_exam_result = None
-        self.is_creating_exam_result = False
-
         self.target_status_label = None
 
         self.target_average_label = None
@@ -142,6 +139,7 @@ class Dashboard:
             expand=True,
             pady=(20, 0)
         )
+
         # Liste der Module
         self.module_list = ModuleList(modules_container, self.controller, self.on_module_selected)
         self.module_list.pack(
@@ -205,16 +203,12 @@ class Dashboard:
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
 
-        self.study_progress_label.config(
-            text=f"{study_progress:.1f}%",
-        )
+        self.study_progress_label.config(text=f"{study_progress:.1f}%")
 
     def update_average(self):
         average = self.controller.grade_service.get_current_average()
 
-        self.average_label.config(
-            text=f"{average:.2f}"
-        )
+        self.average_label.config(text=f"{average:.2f}")
 
     def update_target_display(self):
         target_average = (
@@ -234,99 +228,20 @@ class Dashboard:
             text=status_text
         )
 
-    def update_module_tree(self):
-        # "Geöffnete" Einträge merken.
-        open_semesters = set()
-        for item in self.module_tree.get_children():
-            if self.module_tree.item(item, "open"):
-                open_semesters.add(
-                    self.module_tree.item(item, "text")
-                )
-
-        # Alte Listeneinträge entfernen
-        for item in self.module_tree.get_children():
-            self.module_tree.delete(item)
-
-        # Tree leeren
-        self.tree_items.clear()
-
-        semesters = self.controller.study_service.get_semesters()
-
-        for index, semester in enumerate(semesters, start=1):
-            # Neuer Semester-Eintrag (geöffnet falls in open_semesters)
-            semester_item = self.module_tree.insert(
-                "",
-                "end",
-                text=semester.name,
-                open=semester.name in open_semesters,
-                tags=("current_semester",)
-                if index == self.controller.study_service.get_current_semester()
-                else ()
-            )
-
-            self.semester_items[semester_item] = semester
-
-            self.module_tree.tag_configure(
-                "current_semester",
-                font=("TkDefaultFont", 10, "bold")
-            )
-
-            # Module anzeigen
-            for module in semester.modules:
-                if module.is_completed:
-                    status = "Abgeschlossen"
-                else:
-                    status = "Offen"
-
-                module_item = self.module_tree.insert(
-                    semester_item,
-                    "end",
-                    text=module.module_number,
-                    values=(
-                        module.name,
-                        status
-                    )
-                )
-
-                self.tree_items[module_item] = module
-
-                # Letztes ausgewähltes Modul wieder auswählen
-                if module == self.module_list.selected_module:
-                    self.module_tree.selection_set(module_item)
-                    self.module_tree.focus(module_item)
-
-    def update_semester_controls(self):
-        has_semester = self.selected_semester is not None
-
-        self.set_current_semester_button.config(
-            state="normal" if has_semester else "disabled"
-        )
-
-        self.delete_semester_button.config(
-            state="normal" if has_semester else "disabled"
-        )
-
     def update_exam_result_controls(self):
         self.exam_results.update_controls()
-        self.exam_result_editor.update(
-            exam_result=self.editing_exam_result,
-            is_creating=self.is_creating_exam_result
-        )
+        self.exam_result_editor.update()
 
     def on_module_selected(self, module):
         if module is None:
             self.exam_results.update(None)
 
-            self.editing_exam_result = None
-            self.is_creating_exam_result = False
             self.clear_exam_result_editor()
             self.update_exam_result_controls()
             return
 
         self.exam_results.update(module)
 
-        self.editing_exam_result = None
-        self.is_creating_exam_result = False
         self.clear_exam_result_editor()
         self.update_exam_result_controls()
 
@@ -358,34 +273,20 @@ class Dashboard:
         self.update_target_display()
 
     def on_exam_result_selected(self, result):
-        if result is None:
-            self.editing_exam_result = None
-            self.is_creating_exam_result = False
-            self.exam_result_editor.update()
-            return
-
-        self.editing_exam_result = result
-        self.is_creating_exam_result = False
-
-        self.exam_result_editor.update(
-            exam_result=result
-        )
+        self.exam_result_editor.update(exam_result=result)
 
     def on_new_exam_result(self):
         if self.module_list.selected_module is None:
             return
 
-        self.editing_exam_result = None
-        self.is_creating_exam_result = True
-
-        self.exam_result_editor.update(
-            is_creating=True
-        )
-
+        self.exam_result_editor.update(is_creating=True)
         self.exam_result_editor.focus()
 
     def on_save_exam_result(self, exam_type_value, grade_value):
-        if self.module_list.selected_module is None:
+        module = self.module_list.selected_module
+
+        # Error Handling:
+        if module is None:
             messagebox.showinfo(
                 "Kein Modul ausgewählt",
                 "Bitte wähle zuerst ein Modul aus."
@@ -408,36 +309,28 @@ class Dashboard:
             )
             return
 
+        # Werte auslesen
         exam_type = ExamType(exam_type_value)
+        existing_result = self.exam_result_editor.exam_result
 
         try:
-            if self.editing_exam_result is None:
-                exam_result = ExamResult(
-                    exam_type=exam_type,
-                    grade=grade
-                )
-
-                self.controller.on_exam_result_added(
-                    self.module_list.selected_module,
-                    exam_result
-                )
+            # Result bearbeiten oder neu hinzufügen
+            if existing_result is None:
+                exam_result = ExamResult(exam_type=exam_type, grade=grade)
+                self.controller.on_exam_result_added(module, exam_result)
             else:
-                self.controller.update_exam_result(
-                    self.editing_exam_result,
-                    exam_type,
-                    grade
-                )
-
+                self.controller.update_exam_result(existing_result, exam_type, grade)
         except ValueError as error:
+            # Error Handling
             messagebox.showerror(
                 "Ungültige Eingabe",
                 str(error)
             )
             return
 
-        self.editing_exam_result = None
-        self.is_creating_exam_result = False
-        self.clear_exam_result_editor()
+        # UI aktualisieren
+        self.exam_result_editor.update()
+        self.exam_results.update(module)
         self.update_dashboard()
 
     def show(self):

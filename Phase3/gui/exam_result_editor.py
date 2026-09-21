@@ -10,6 +10,9 @@ class ExamResultEditor(tk.LabelFrame):
         parent,
         on_save
     ):
+        self.exam_result = None
+        self.is_creating = False
+
         super().__init__(
             parent,
             text="PRÜFUNGSERGEBNIS BEARBEITEN",
@@ -91,6 +94,9 @@ class ExamResultEditor(tk.LabelFrame):
         exam_result=None,
         is_creating=False
     ):
+        self.exam_result = exam_result
+        self.is_creating = is_creating
+
         editor_active = (
             exam_result is not None
             or is_creating
