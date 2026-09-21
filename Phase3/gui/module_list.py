@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 
+from models.module import Module
 from models.semester import Semester
 
 
@@ -9,7 +10,9 @@ class ModuleList(tk.LabelFrame):
         self,
         parent,
         controller,
-        on_module_selected
+        on_module_selected,
+        on_module_added,
+        on_module_deleted
     ):
         super().__init__(
             parent,
@@ -20,6 +23,8 @@ class ModuleList(tk.LabelFrame):
 
         self.controller = controller
         self.on_module_selected_callback = on_module_selected
+        self.on_module_added_callback = on_module_added
+        self.on_module_deleted_callback = on_module_deleted
 
         self.module_tree = None
         self.tree_items = {}
@@ -31,6 +36,9 @@ class ModuleList(tk.LabelFrame):
         self.new_semester_button = None
         self.delete_semester_button = None
         self.set_current_semester_button = None
+
+        self.new_module_button = None
+        self.delete_module_button = None
 
         self.create_widgets()
 
@@ -97,6 +105,34 @@ class ModuleList(tk.LabelFrame):
             command=self.on_delete_semester
         )
         self.delete_semester_button.pack(
+            fill="x",
+            pady=(10, 0)
+        )
+
+        separator = ttk.Separator(
+            semester_button_frame,
+            orient="horizontal"
+        )
+        separator.pack(
+            fill="x",
+            pady=10
+        )
+
+        self.new_module_button = tk.Button(
+            semester_button_frame,
+            text="Modul\nhinzufügen",
+            command=self.on_new_module
+        )
+        self.new_module_button.pack(
+            fill="x"
+        )
+
+        self.delete_module_button = tk.Button(
+            semester_button_frame,
+            text="Modul\nlöschen",
+            command=self.on_delete_module
+        )
+        self.delete_module_button.pack(
             fill="x",
             pady=(10, 0)
         )
@@ -228,6 +264,7 @@ class ModuleList(tk.LabelFrame):
 
     def update_controls(self):
         has_semester = self.selected_semester is not None
+        has_module = self.selected_module is not None
 
         self.set_current_semester_button.config(
             state="normal" if has_semester else "disabled"
@@ -235,6 +272,14 @@ class ModuleList(tk.LabelFrame):
 
         self.delete_semester_button.config(
             state="normal" if has_semester else "disabled"
+        )
+
+        self.new_module_button.config(
+            state="normal" if has_semester else "disabled"
+        )
+
+        self.delete_module_button.config(
+            state="normal" if has_module else "disabled"
         )
 
     def on_set_current_semester(self):
@@ -302,3 +347,143 @@ class ModuleList(tk.LabelFrame):
         self.update()
 
         self.on_module_selected_callback(None)
+
+    def on_new_module(self):
+        if self.selected_semester is None:
+            return
+
+        dialog = tk.Toplevel(self)
+        dialog.title("Modul bearbeiten")
+        dialog.transient(self.winfo_toplevel())
+        dialog.grab_set()
+
+        tk.Label(
+            dialog,
+            text="Modulnummer:"
+        ).grid(
+            row=0,
+            column=0,
+            padx=10,
+            pady=(10, 5),
+            sticky="w"
+        )
+
+        module_number_entry = tk.Entry(dialog)
+        module_number_entry.grid(
+            row=0,
+            column=1,
+            padx=10,
+            pady=(10, 5)
+        )
+
+        tk.Label(
+            dialog,
+            text="Modulname:"
+        ).grid(
+            row=1,
+            column=0,
+            padx=10,
+            pady=5,
+            sticky="w"
+        )
+
+        module_name_entry = tk.Entry(dialog)
+        module_name_entry.grid(
+            row=1,
+            column=1,
+            padx=10,
+            pady=5
+        )
+
+        def save():
+            module_number = module_number_entry.get().strip()
+            module_name = module_name_entry.get().strip()
+
+            if not module_number:
+                messagebox.showerror(
+                    "Ungültige Eingabe",
+                    "Die Modulnummer darf nicht leer sein.",
+                    parent=dialog
+                )
+                return
+
+            if not module_name:
+                messagebox.showerror(
+                    "Ungültige Eingabe",
+                    "Der Modulname darf nicht leer sein.",
+                    parent=dialog
+                )
+                return
+
+            module = Module(
+                module_number=module_number,
+                name=module_name
+            )
+
+            try:
+                self.on_module_added_callback(
+                    self.selected_semester,
+                    module
+                )
+            except ValueError as error:
+                messagebox.showerror(
+                    "Modul kann nicht hinzugefügt werden",
+                    str(error),
+                    parent=dialog
+                )
+                return
+
+            dialog.destroy()
+
+        button_frame = tk.Frame(dialog)
+        button_frame.grid(
+            row=2,
+            column=0,
+            columnspan=2,
+            pady=10
+        )
+
+        tk.Button(
+            button_frame,
+            text="Speichern",
+            command=save
+        ).pack(
+            side="left",
+            padx=5
+        )
+
+        tk.Button(
+            button_frame,
+            text="Abbrechen",
+            command=dialog.destroy
+        ).pack(
+            side="left",
+            padx=5
+        )
+
+        module_number_entry.focus_set()
+
+    def on_delete_module(self):
+        if self.selected_module is None:
+            return
+
+        module = self.selected_module
+
+        # Dialog: Willst du wirklich löschen?
+        confirmed = messagebox.askyesno(
+            "Modul löschen",
+            f"Möchtest du '{module.name}' wirklich löschen?\n\n"
+            "Alle Prüfungsergebnisse dieses Moduls werden ebenfalls gelöscht."
+        )
+
+        if not confirmed:
+            return
+
+        try:
+            self.on_module_deleted_callback(self.selected_semester, module)
+        except ValueError as error:
+            messagebox.showerror(
+                "Modul kann nicht gelöscht werden",
+                str(error)
+            )
+            return

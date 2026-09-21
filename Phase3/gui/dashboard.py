@@ -133,7 +133,7 @@ class Dashboard:
         self.target_status_label.pack(pady=(10, 0))
 
         # Liste der Module
-        self.module_list = ModuleList(main_frame, self.controller, self.on_module_selected)
+        self.module_list = ModuleList(main_frame, self.controller, self.on_module_selected, self.on_module_added, self.on_module_deleted)
         self.module_list.pack(
             fill="both",
             expand=True,
@@ -203,6 +203,14 @@ class Dashboard:
     def on_module_selected(self, module):
         self.exam_results.update(module)
         self.exam_result_editor.update()
+
+    def on_module_added(self, semester, module):
+        self.controller.on_module_added(semester, module)
+        self.update_dashboard()
+
+    def on_module_deleted(self, semester, module):
+        self.controller.on_module_deleted(semester, module)
+        self.update_dashboard()
 
     def on_set_target_average(self):
         # float-Zahl soll abgefragt werden, falls nicht: Fehlermeldung

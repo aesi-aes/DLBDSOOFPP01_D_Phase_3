@@ -7,3 +7,9 @@ from models.module import Module
 class Semester:
     name: str
     modules: list[Module] = field(default_factory=list)
+
+    def add_module(self, module: Module):
+        self.modules.append(module)
+
+    def remove_module(self, module: Module):
+        self.modules.remove(module)

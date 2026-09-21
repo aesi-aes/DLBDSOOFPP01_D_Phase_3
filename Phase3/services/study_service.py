@@ -83,3 +83,9 @@ class StudyService:
                 self.degree_program.current_semester,
                 len(self.degree_program.semesters)
             )
+
+    def add_module(self, semester, module):
+        semester.add_module(module)
+
+    def delete_module(self, semester, module):
+        semester.remove_module(module)

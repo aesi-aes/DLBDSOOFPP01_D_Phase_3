@@ -54,6 +54,12 @@ class DashboardController:
     def on_semester_deleted(self, semester: Semester):
         self.study_service.delete_semester(semester)
 
+    def on_module_added(self, semester, module):
+        self.study_service.add_module(semester, module)
+
+    def on_module_deleted(self, semester, module):
+        self.study_service.delete_module(semester, module)
+
     def update_exam_result(
         self,
         exam_result: ExamResult,
@@ -65,3 +71,4 @@ class DashboardController:
             exam_type,
             grade
         )
+        pass
