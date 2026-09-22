@@ -333,7 +333,8 @@ class ModuleList(tk.LabelFrame):
             "Semester löschen",
             f"Möchtest du '{semester.name}' wirklich löschen?\n\n"
             "Alle Module und Prüfungsergebnisse dieses Semesters "
-            "werden ebenfalls gelöscht."
+            "werden ebenfalls gelöscht.",
+            icon="warning"
         )
 
         if not confirmed:
@@ -344,7 +345,8 @@ class ModuleList(tk.LabelFrame):
         except ValueError as error:
             messagebox.showerror(
                 "Semester kann nicht gelöscht werden",
-                str(error)
+                str(error),
+                icon="error"
             )
             return
 
@@ -410,7 +412,8 @@ class ModuleList(tk.LabelFrame):
                 messagebox.showerror(
                     "Ungültige Eingabe",
                     "Die Modulnummer darf nicht leer sein.",
-                    parent=dialog
+                    parent=dialog,
+                    icon="error"
                 )
                 return
 
@@ -418,7 +421,8 @@ class ModuleList(tk.LabelFrame):
                 messagebox.showerror(
                     "Ungültige Eingabe",
                     "Der Modulname darf nicht leer sein.",
-                    parent=dialog
+                    parent=dialog,
+                    icon="error"
                 )
                 return
 
@@ -436,7 +440,8 @@ class ModuleList(tk.LabelFrame):
                 messagebox.showerror(
                     "Modul kann nicht hinzugefügt werden",
                     str(error),
-                    parent=dialog
+                    parent=dialog,
+                    icon="error"
                 )
                 return
 
@@ -480,7 +485,8 @@ class ModuleList(tk.LabelFrame):
         confirmed = messagebox.askyesno(
             "Modul löschen",
             f"Möchtest du '{module.name}' wirklich löschen?\n\n"
-            "Alle Prüfungsergebnisse dieses Moduls werden ebenfalls gelöscht."
+            "Alle Prüfungsergebnisse dieses Moduls werden ebenfalls gelöscht.",
+            icon="warning"
         )
 
         if not confirmed:
@@ -491,6 +497,7 @@ class ModuleList(tk.LabelFrame):
         except ValueError as error:
             messagebox.showerror(
                 "Modul kann nicht gelöscht werden",
-                str(error)
+                str(error),
+                icon="error"
             )
             return

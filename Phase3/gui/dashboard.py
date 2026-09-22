@@ -219,7 +219,8 @@ class Dashboard:
         except ValueError:
             messagebox.showerror(
                 "Ungültige Eingabe",
-                "Bitte eine gültige Zahl angeben."
+                "Bitte eine gültige Zahl angeben.",
+                icon="error"
             )
             return
 
@@ -229,7 +230,8 @@ class Dashboard:
         except ValueError as error:
             messagebox.showerror(
                 "Ungültige Eingabe",
-                str(error)
+                str(error),
+                icon="error"
             )
             return
 
@@ -252,14 +254,16 @@ class Dashboard:
         if module is None:
             messagebox.showinfo(
                 "Kein Modul ausgewählt",
-                "Bitte wähle zuerst ein Modul aus."
+                "Bitte wähle zuerst ein Modul aus.",
+                icon="info"
             )
             return
 
         if not exam_type_value:
             messagebox.showerror(
                 "Ungültige Eingabe",
-                "Bitte wähle eine Prüfungsart aus."
+                "Bitte wähle eine Prüfungsart aus.",
+                icon="error"
             )
             return
 
@@ -271,7 +275,8 @@ class Dashboard:
             except ValueError:
                 messagebox.showerror(
                     "Ungültige Eingabe",
-                    "Bitte gib eine gültige Note (von 1-6) ein."
+                    "Bitte gib eine gültige Note (von 1-6) ein.",
+                    icon="error"
                 )
                 return
 
@@ -290,7 +295,8 @@ class Dashboard:
             # Error Handling
             messagebox.showerror(
                 "Ungültige Eingabe",
-                str(error)
+                str(error),
+                icon="error"
             )
             return
 

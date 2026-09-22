@@ -190,7 +190,8 @@ class ExamResults(tk.LabelFrame):
         if module is None:
             messagebox.showinfo(
                 "Kein Modul ausgewählt",
-                "Bitte wähle zuerst ein Modul aus."
+                "Bitte wähle zuerst ein Modul aus.",
+                icon="question"
             )
             return
 
@@ -198,14 +199,16 @@ class ExamResults(tk.LabelFrame):
         if self.selected_result is None:
             messagebox.showinfo(
                 "Kein Ergebnis ausgewählt",
-                "Bitte wähle zuerst ein Prüfungsergebnis aus."
+                "Bitte wähle zuerst ein Prüfungsergebnis aus.",
+                icon="question"
             )
             return
 
         # Löschen bestätigen
         confirmed = messagebox.askyesno(
             "Prüfungsergebnis löschen",
-            "Möchtest du dieses Prüfungsergebnis wirklich löschen?"
+            "Möchtest du dieses Prüfungsergebnis wirklich löschen?",
+            icon="warning"
         )
 
         if not confirmed:
