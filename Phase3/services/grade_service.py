@@ -8,7 +8,6 @@ class GradeService:
 
     def __init__(self, degree_program: DegreeProgram):
         self.degree_program = degree_program
-        self.target_average = 2.0
 
     def get_current_average(self) -> float:
         grades = []
@@ -56,7 +55,7 @@ class GradeService:
 
     # Wurde der Ziel-Notendurchschnitt erreicht?
     def has_reached_target_average(self) -> bool:
-        return self.get_current_average() <= self.target_average
+        return self.get_current_average() <= self.degree_program.target_average_grade
 
     # Prüfungsergebnis aktualisieren
     def update_exam_result(
