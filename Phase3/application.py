@@ -1,31 +1,25 @@
-from gui.dashboard import Dashboard
-from models.degree_program import DegreeProgram
-from models.semester import Semester
-from models.module import Module
-from models.exam_result import ExamResult
-from models.exam_type import ExamType
-
-from services.study_service import StudyService
-from services.grade_service import GradeService
 from controllers.dashboard_controller import DashboardController
+from data.config import DATA_FILE
+from data.json_data_store import JsonDataStore
+from gui.dashboard import Dashboard
+from services.grade_service import GradeService
+from services.study_service import StudyService
 
 
 class Application:
-    def __init__(self):
-        self.dashboard = None
-        self.degree_program = None
-        self.study_service = None
-        self.grade_service = None
-        self.dashboard_controller = None
+    def __init__(self, degree_program, save_on_close=True):
+        self.degree_program = degree_program
+        self.save_on_close = save_on_close
 
-    def start(self):
-        self.initialize()
+        self.data_store = JsonDataStore(DATA_FILE)
 
-    def initialize(self):
-        self.create_test_data()
+        self.study_service = StudyService(
+            self.degree_program
+        )
 
-        self.study_service = StudyService(self.degree_program)
-        self.grade_service = GradeService(self.degree_program)
+        self.grade_service = GradeService(
+            self.degree_program
+        )
 
         self.dashboard_controller = DashboardController(
             self.study_service,
@@ -36,60 +30,20 @@ class Application:
             self.dashboard_controller
         )
 
+        # Event -> Schließen der App
+        self.dashboard.root.protocol(
+            "WM_DELETE_WINDOW",
+            self.on_close
+        )
+
+    def start(self):
         self.dashboard.show()
 
+    def on_close(self):
+        # JSON-Daten speichern.
+        if self.save_on_close:
+            self.data_store.save(
+                self.degree_program
+            )
 
-    def create_test_data(self):
-        # Degree Program
-        self.degree_program = DegreeProgram(
-            name="SQL & Python Programming",
-            current_semester=4
-        )
-
-        # Semesters
-        semester_1 = Semester(name="Semester 1")
-        semester_2 = Semester(name="Semester 2")
-        semester_3 = Semester(name="Semester 3")
-        semester_4 = Semester(name="Semester 4")
-
-        # Modules
-        module_python1 = Module(
-            module_number="P001",
-            name="Python Basics"
-        )
-
-        module_sql = Module(
-            module_number="SQL001",
-            name="SQL Basics"
-        )
-
-        module_python2 = Module(
-            module_number="P002",
-            name="Python Project: Course Dashboard"
-        )
-
-        # Exam Results
-        result1 = ExamResult(
-            exam_type=ExamType.PROJECT,
-            grade=1.7
-        )
-
-        result2 = ExamResult(
-            exam_type=ExamType.ONLINE_TEST,
-            grade=2.0
-        )
-
-        # Relationships herstellen
-        self.degree_program.semesters.extend([
-            semester_1,
-            semester_2,
-            semester_3,
-            semester_4
-        ])
-
-        semester_1.modules.append(module_python1)
-        semester_2.modules.append(module_sql)
-        semester_4.modules.append(module_python2)
-
-        module_python1.exam_results.append(result1)
-        module_sql.exam_results.append(result2)
+        self.dashboard.root.destroy()
