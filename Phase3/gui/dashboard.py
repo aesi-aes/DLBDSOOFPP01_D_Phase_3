@@ -150,6 +150,7 @@ class Dashboard:
             self.controller,
             on_result_selected=self.on_exam_result_selected,
             on_new_result=self.on_new_exam_result,
+            on_delete_result=self.on_delete_exam_result,
             get_selected_module=lambda: self.module_list.selected_module
         )
         self.exam_results.pack(
@@ -268,6 +269,8 @@ class Dashboard:
 
     def on_exam_result_selected(self, result):
         self.exam_result_editor.update(exam_result=result)
+        self.update_average()
+        self.update_study_progress()
 
     def on_new_exam_result(self):
         if self.module_list.selected_module is None:
@@ -330,6 +333,20 @@ class Dashboard:
             return
 
         # UI aktualisieren
+        self.exam_result_editor.update()
+        self.update_dashboard()
+
+    def on_delete_exam_result(self, result):
+        module = self.module_list.selected_module
+
+        if module is None:
+            return
+
+        self.controller.on_exam_result_deleted(
+            module,
+            result
+        )
+
         self.exam_result_editor.update()
         self.update_dashboard()
 

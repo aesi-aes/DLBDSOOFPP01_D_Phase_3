@@ -9,6 +9,7 @@ class ExamResults(tk.LabelFrame):
         controller,
         on_result_selected,
         on_new_result,
+        on_delete_result,
         get_selected_module
     ):
         super().__init__(
@@ -21,6 +22,7 @@ class ExamResults(tk.LabelFrame):
         self.controller = controller
         self.on_result_selected_callback = on_result_selected
         self.on_new_result_callback = on_new_result
+        self.on_delete_result_callback = on_delete_result
         self.get_selected_module = get_selected_module
 
         self.exam_results_tree = None
@@ -195,8 +197,10 @@ class ExamResults(tk.LabelFrame):
             )
             return
 
+        result = self.selected_result
+
         # Fehlermeldung
-        if self.selected_result is None:
+        if result is None:
             messagebox.showinfo(
                 "Kein Ergebnis ausgewählt",
                 "Bitte wähle zuerst ein Prüfungsergebnis aus.",
@@ -214,10 +218,4 @@ class ExamResults(tk.LabelFrame):
         if not confirmed:
             return
 
-        result = self.selected_result
-
-        self.controller.on_exam_result_deleted(module, result)
-
-        self.update(module)
-
-        self.on_result_selected_callback(None)
+        self.on_delete_result_callback(result)
