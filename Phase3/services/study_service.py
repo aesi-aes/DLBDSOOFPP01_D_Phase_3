@@ -9,6 +9,7 @@ class StudyService:
     def __init__(self, degree_program: DegreeProgram):
         self.degree_program = degree_program
 
+    # alle Module
     def get_total_modules(self) -> int:
         total_modules = 0
 
@@ -17,6 +18,7 @@ class StudyService:
 
         return total_modules
 
+    # abgeschlossene Module.
     def get_completed_modules(self) -> int:
         completed_modules = 0
 
@@ -38,14 +40,17 @@ class StudyService:
 
         return completed_modules / total_modules * 100
 
+    # aktuelles Semester
     def get_current_semester(self) -> int:
         return self.degree_program.current_semester
 
+    # aktuelles Semester setzen
     def set_current_semester(self, semester: Semester):
         semester_index = self.degree_program.semesters.index(semester)
 
         self.degree_program.current_semester = semester_index + 1
 
+    # alle Module
     def get_modules(self) -> list[Module]:
         modules = []
 
@@ -54,12 +59,15 @@ class StudyService:
 
         return modules
 
+    # alle Semester
     def get_semesters(self) -> list[Semester]:
         return self.degree_program.semesters
 
+    # Semester hinzufügen
     def add_semester(self, semester: Semester):
         self.degree_program.semesters.append(semester)
 
+    # Semester löschen
     def delete_semester(self, semester: Semester):
         if len(self.degree_program.semesters) <= 1:
             raise ValueError(
@@ -84,8 +92,10 @@ class StudyService:
                 len(self.degree_program.semesters)
             )
 
+    # Modul hinzufügen
     def add_module(self, semester, module):
         semester.add_module(module)
 
+    # Modul löschen
     def delete_module(self, semester, module):
         semester.remove_module(module)

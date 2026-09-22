@@ -16,24 +16,28 @@ class GradeService:
         for semester in self.degree_program.semesters:
             for module in semester.modules:
                 for exam_result in module.exam_results:
-                    grades.append(exam_result.grade)
+                    if exam_result.grade is not None:
+                        grades.append(exam_result.grade)
 
         if not grades:
             return 0.0
 
         return sum(grades) / len(grades)
 
+    # Ziel-Notendurchschnitt
     def get_target_average(self) -> float:
-        return self.target_average
+        return self.degree_program.target_average_grade
 
+    # Ziel-Notendurchschnitt setzen
     def set_target_average(self, target_average: float):
         if target_average < 1.0 or target_average > 6.0:
             raise ValueError(
                 "Der Ziel-Durchschnitt muss zwischen 1.0 und 6.0 liegen."
             )
 
-        self.target_average = target_average
+        self.degree_program.target_average_grade = target_average
 
+    # Prüfungsergebnis hinzufügen
     def add_exam_result(
         self,
         module: Module,
@@ -42,6 +46,7 @@ class GradeService:
         self.validate_grade(exam_result.grade)
         module.exam_results.append(exam_result)
 
+    # Prüfungsergebnis löschen
     def delete_exam_result(
             self,
             module: Module,
@@ -49,9 +54,11 @@ class GradeService:
     ):
         module.exam_results.remove(exam_result)
 
+    # Wurde der Ziel-Notendurchschnitt erreicht?
     def has_reached_target_average(self) -> bool:
         return self.get_current_average() <= self.target_average
 
+    # Prüfungsergebnis aktualisieren
     def update_exam_result(
             self,
             exam_result: ExamResult,
@@ -63,8 +70,12 @@ class GradeService:
         exam_result.exam_type = exam_type
         exam_result.grade = grade
 
+    # Note validieren (1-6)
     def validate_grade(self, grade: float):
+        if grade is None:
+            return
+
         if grade < 1.0 or grade > 6.0:
             raise ValueError(
-                "Grade must be between 1.0 and 6.0."
+                "Note muss zwischen 1.0 and 6.0 liegen."
             )

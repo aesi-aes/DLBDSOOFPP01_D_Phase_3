@@ -126,10 +126,16 @@ class ExamResultEditor(tk.LabelFrame):
             self.exam_type_combobox.set(
                 exam_result.exam_type.value
             )
-            self.grade_entry.insert(
-                0,
-                str(exam_result.grade)
-            )
+            if exam_result.grade is not None:
+                self.grade_entry.insert(
+                    0,
+                    str(exam_result.grade)
+                )
+            else:
+                self.grade_entry.insert(
+                    0,
+                    ''
+                )
 
     def clear(self):
         self.exam_type_combobox.set("")

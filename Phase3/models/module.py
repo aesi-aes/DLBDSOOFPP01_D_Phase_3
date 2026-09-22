@@ -11,4 +11,10 @@ class Module:
 
     @property
     def is_completed(self) -> bool:
-        return bool(self.exam_results)
+        return (
+            bool(self.exam_results)
+            and all(
+                exam_result.is_passed
+                for exam_result in self.exam_results
+            )
+        )

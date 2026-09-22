@@ -6,8 +6,8 @@ from models.exam_type import ExamType
 @dataclass
 class ExamResult:
     exam_type: ExamType
-    grade: float
+    grade: float | None = None
 
     @property
     def is_passed(self) -> bool:
-        return self.grade <= 4.0
+        return self.grade is not None and self.grade <= 4.0

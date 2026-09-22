@@ -111,16 +111,18 @@ class ExamResults(tk.LabelFrame):
 
         # Result Liste aufbauen.
         for result in module.exam_results:
+            grade_string = "-" if result.grade is None else f"{result.grade:.1f}"
+            status_string = (
+                "Bestanden"
+                if result.is_passed
+                else "Noch nicht geprüft"
+                if result.grade is None
+                else "Nicht bestanden"
+            )
             item = self.exam_results_tree.insert(
                 "",
                 "end",
-                values=(
-                    result.exam_type.value,
-                    f"{result.grade:.1f}",
-                    "Bestanden"
-                    if result.is_passed
-                    else "Nicht bestanden"
-                )
+                values=(result.exam_type.value, grade_string, status_string)
             )
 
             self.exam_result_items[item] = result

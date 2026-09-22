@@ -8,3 +8,4 @@ class DegreeProgram:
     name: str
     semesters: list[Semester] = field(default_factory=list)
     current_semester: int = 1
+    target_average_grade: float = 2.0

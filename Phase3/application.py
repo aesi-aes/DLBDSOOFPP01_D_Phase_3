@@ -1,5 +1,4 @@
 from gui.dashboard import Dashboard
-from models.student import Student
 from models.degree_program import DegreeProgram
 from models.semester import Semester
 from models.module import Module
@@ -14,7 +13,6 @@ from controllers.dashboard_controller import DashboardController
 class Application:
     def __init__(self):
         self.dashboard = None
-        self.student = None
         self.degree_program = None
         self.study_service = None
         self.grade_service = None
@@ -46,13 +44,6 @@ class Application:
         self.degree_program = DegreeProgram(
             name="SQL & Python Programming",
             current_semester=4
-        )
-
-        # Student
-        self.student = Student(
-            student_number=123456,
-            current_semester=4,
-            degree_program=self.degree_program
         )
 
         # Semesters
@@ -89,9 +80,6 @@ class Application:
         )
 
         # Relationships herstellen
-
-        self.student.degree_program = self.degree_program
-
         self.degree_program.semesters.extend([
             semester_1,
             semester_2,

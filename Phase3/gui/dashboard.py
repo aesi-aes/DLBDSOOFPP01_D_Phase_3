@@ -263,14 +263,17 @@ class Dashboard:
             )
             return
 
-        try:
-            grade = float(grade_value)
-        except ValueError:
-            messagebox.showerror(
-                "Ungültige Eingabe",
-                "Bitte gib eine gültige Note (von 1-6) ein."
-            )
-            return
+        if grade_value.strip() == "":
+            grade = None
+        else:
+            try:
+                grade = float(grade_value)
+            except ValueError:
+                messagebox.showerror(
+                    "Ungültige Eingabe",
+                    "Bitte gib eine gültige Note (von 1-6) ein."
+                )
+                return
 
         # Werte auslesen
         exam_type = ExamType(exam_type_value)
