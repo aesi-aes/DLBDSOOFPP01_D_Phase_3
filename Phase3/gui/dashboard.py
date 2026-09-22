@@ -17,6 +17,7 @@ class Dashboard:
         self.exam_result_editor = None
 
         self.progress_canvas = None
+        self.progress_modules_label = None
         self.target_status_label = None
         self.target_average_label = None
         self.average_label = None
@@ -69,6 +70,13 @@ class Dashboard:
             highlightthickness=0
         )
         self.progress_canvas.pack()
+
+        # abgeschlossene Module
+        self.progress_modules_label = tk.Label(
+            study_frame,
+            text=""
+        )
+        self.progress_modules_label.pack(pady=(5, 0))
 
         # Average grade card
         grade_frame = tk.LabelFrame(
@@ -205,6 +213,14 @@ class Dashboard:
             60, 60,
             text=f"{study_progress:.0f}%",
             font=("TkDefaultFont", 18, "bold")
+        )
+
+        # abgeschlossene Modulanzahl
+        completed_modules = self.controller.study_service.get_completed_modules()
+        total_modules = self.controller.study_service.get_total_modules()
+
+        self.progress_modules_label.config(
+            text=f"{completed_modules} von {total_modules} Modulen"
         )
 
     def update_average(self):
