@@ -39,6 +39,7 @@ class ExamResultEditor(tk.LabelFrame):
             padx=(0, 10)
         )
 
+        # Selektion des Prüfungstyps
         self.exam_type_combobox = ttk.Combobox(
             self,
             values=[
@@ -64,6 +65,7 @@ class ExamResultEditor(tk.LabelFrame):
             pady=(10, 0)
         )
 
+        # Notenangabe
         self.grade_entry = tk.Entry(
             self,
             state="disabled"
@@ -77,6 +79,7 @@ class ExamResultEditor(tk.LabelFrame):
 
         self.columnconfigure(1, weight=1)
 
+        # Speichern Button
         self.save_result_button = tk.Button(
             self,
             text="Speichern",
@@ -97,8 +100,10 @@ class ExamResultEditor(tk.LabelFrame):
         self.exam_result = exam_result
         self.is_creating = is_creating
 
+        # Editor aufräumen
         self.clear()
 
+        # UI elemente aktivieren / deaktivieren
         editor_active = (
             exam_result is not None
             or is_creating
@@ -122,8 +127,7 @@ class ExamResultEditor(tk.LabelFrame):
             else "disabled"
         )
 
-        self.clear()
-
+        # Werte in UI setzen
         if exam_result is not None:
             self.exam_type_combobox.set(
                 exam_result.exam_type.value
@@ -140,10 +144,12 @@ class ExamResultEditor(tk.LabelFrame):
                 )
 
     def clear(self):
+        # Editor-Werte löschen
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
 
     def focus(self):
+        # Combobox auswählen
         self.exam_type_combobox.focus_set()
 
     def on_save(self):

@@ -10,4 +10,5 @@ class ExamResult:
 
     @property
     def is_passed(self) -> bool:
+        # Note ist gesetzt, und Wert <= 4.0
         return self.grade is not None and self.grade <= 4.0

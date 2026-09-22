@@ -42,6 +42,7 @@ class ExamResults(tk.LabelFrame):
             pady=(0, 10)
         )
 
+        # Liste der Prüfungsergebnisse
         self.exam_results_tree = ttk.Treeview(
             exam_result_content_frame,
             columns=("exam_type", "grade", "status"),
@@ -133,6 +134,7 @@ class ExamResults(tk.LabelFrame):
         self.update_controls()
 
     def clear(self):
+        # Liste der Prüfungsergebnisse löschen
         for item in self.exam_results_tree.get_children():
             self.exam_results_tree.delete(item)
 
@@ -142,6 +144,7 @@ class ExamResults(tk.LabelFrame):
         has_module = self.get_selected_module() is not None
         has_result = self.selected_result is not None
 
+        # Buttons enablen/disablen
         self.new_result_button.config(
             state="normal" if has_module else "disabled"
         )

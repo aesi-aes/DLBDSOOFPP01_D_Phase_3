@@ -11,6 +11,7 @@ class Module:
 
     @property
     def is_completed(self) -> bool:
+        # Modul ist nur abgeschlossen, wenn Prüfungsergebnisse vorhanden sind, und alle sind abgeschlossen (is_passed)
         return (
             bool(self.exam_results)
             and all(

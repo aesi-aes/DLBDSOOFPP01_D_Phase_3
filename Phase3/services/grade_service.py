@@ -5,10 +5,10 @@ from models.module import Module
 
 # Notenberechnung, Zieldurchschnitt setzen.
 class GradeService:
-
     def __init__(self, degree_program: DegreeProgram):
         self.degree_program = degree_program
 
+    # derzeitiger Notendurchschnitt
     def get_current_average(self) -> float:
         grades = []
 
