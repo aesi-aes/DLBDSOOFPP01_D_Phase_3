@@ -101,9 +101,7 @@ def main():
         try:
             degree_program = data_store.load()
         except FileNotFoundError:
-            degree_program = DegreeProgram(
-                name="Mein Studiengang"
-            )
+            degree_program = DegreeProgram()
 
     # Application starten.
     application = Application(
