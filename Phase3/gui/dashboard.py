@@ -238,9 +238,9 @@ class Dashboard:
         )
 
         if self.controller.grade_service.has_reached_target_average():
-            status_text = "Ziel erreicht"
+            status_text = "✓ Ziel erreicht"
         else:
-            status_text = "Ziel noch nicht erreicht"
+            status_text = "✗ Ziel noch nicht erreicht"
 
         self.target_status_label.config(
             text=status_text
