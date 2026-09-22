@@ -145,21 +145,21 @@ class ModuleList(tk.LabelFrame):
         # "Geöffnete" Einträge merken.
         open_semesters = {
             semester.name
-            for semester, item in self.semester_items.items()
-            if self.module_tree.item(item, "open")
+            for item, semester in self.semester_items.items()
+            if self.module_tree.exists(item)
+               and self.module_tree.item(item, "open")
         }
+
+        semesters = self.controller.study_service.get_semesters()
 
         # Aktuellen Semester-Index merken
         current_semester_index = (
             self.controller.study_service.get_current_semester() - 1
         )
 
-        # Semester-Items erstellen
-        for item in self.module_tree.get_children():
-            if self.module_tree.item(item, "open"):
-                open_semesters.add(
-                    self.module_tree.item(item, "text")
-                )
+        # Aktuelles Semester immer geöffnet halten
+        if semesters and current_semester_index < len(semesters):
+            open_semesters.add(semesters[current_semester_index].name)
 
         # Alte Listeneinträge entfernen
         for item in self.module_tree.get_children():
@@ -168,12 +168,6 @@ class ModuleList(tk.LabelFrame):
         # Items aufräumen
         self.tree_items.clear()
         self.semester_items.clear()
-
-        semesters = self.controller.study_service.get_semesters()
-
-        # Aktuelles Semester immer geöffnet halten
-        if semesters and current_semester_index < len(semesters):
-            open_semesters.add(semesters[current_semester_index].name)
 
         for index, semester in enumerate(semesters, start=1):
             semester_item = self.module_tree.insert(
