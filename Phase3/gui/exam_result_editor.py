@@ -97,6 +97,8 @@ class ExamResultEditor(tk.LabelFrame):
         self.exam_result = exam_result
         self.is_creating = is_creating
 
+        self.clear()
+
         editor_active = (
             exam_result is not None
             or is_creating
