@@ -214,7 +214,6 @@ class ExamResults(tk.LabelFrame):
         if not confirmed:
             return
 
-
         result = self.selected_result
 
         self.controller.on_exam_result_deleted(module, result)

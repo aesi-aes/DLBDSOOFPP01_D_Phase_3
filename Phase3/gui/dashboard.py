@@ -16,6 +16,7 @@ class Dashboard:
         self.exam_results = None
         self.exam_result_editor = None
 
+        self.progress_canvas = None
         self.target_status_label = None
         self.target_average_label = None
         self.average_label = None
@@ -60,11 +61,14 @@ class Dashboard:
             padx=(0, 10)
         )
 
-        self.study_progress_label = tk.Label(
+        # Canvas für Tortendiagramm: Studienfortschritt in %
+        self.progress_canvas = tk.Canvas(
             study_frame,
-            font=("Arial", 32, "bold")
+            width=120,
+            height=120,
+            highlightthickness=0
         )
-        self.study_progress_label.pack()
+        self.progress_canvas.pack()
 
         # Average grade card
         grade_frame = tk.LabelFrame(
@@ -175,7 +179,32 @@ class Dashboard:
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
 
-        self.study_progress_label.config(text=f"{study_progress:.1f}%")
+        self.progress_canvas.delete("all")
+
+        # Hintergrund: voller Kreis
+        self.progress_canvas.create_arc(
+            10, 10, 110, 110,
+            start=90,
+            extent=360,
+            style="arc",
+            width=12
+        )
+
+        # Fortschritt: Teilkreis
+        self.progress_canvas.create_arc(
+            10, 10, 110, 110,
+            start=90,
+            extent=-study_progress * 3.6,
+            style="arc",
+            width=12
+        )
+
+        # Prozentzahl in der Mitte
+        self.progress_canvas.create_text(
+            60, 60,
+            text=f"{study_progress:.0f}%",
+            font=("TkDefaultFont", 18, "bold")
+        )
 
     def update_average(self):
         average = self.controller.grade_service.get_current_average()
