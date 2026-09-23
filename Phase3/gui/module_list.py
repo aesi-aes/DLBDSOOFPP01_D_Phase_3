@@ -49,8 +49,18 @@ class ModuleList(tk.LabelFrame):
             expand=True
         )
 
+        # Liste der Module + Scrollbar
+        modules_tree_frame = tk.Frame(
+            module_content_frame
+        )
+        modules_tree_frame.pack(
+            side="left",
+            fill="x",
+            expand=True
+        )
+
         self.module_tree = ttk.Treeview(
-            module_content_frame,
+            modules_tree_frame,
             columns=("name", "status"),
             show="tree headings"
         )
@@ -68,6 +78,21 @@ class ModuleList(tk.LabelFrame):
             side="left",
             fill="both",
             expand=True
+        )
+
+        # Vertikale Scrollbar
+        scrollbar = ttk.Scrollbar(
+            modules_tree_frame,
+            orient="vertical",
+            command=self.module_tree.yview
+        )
+        scrollbar.pack(
+            side="right",
+            fill="y"
+        )
+
+        self.module_tree.configure(
+            yscrollcommand=scrollbar.set
         )
 
         # Semester-Buttons
