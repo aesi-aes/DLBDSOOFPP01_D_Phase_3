@@ -42,9 +42,18 @@ class ExamResults(tk.LabelFrame):
             pady=(0, 10)
         )
 
-        # Liste der Prüfungsergebnisse
+        # Liste der Prüfungsergebnisse + Scrollbar
+        exam_result_tree_frame = tk.Frame(
+            exam_result_content_frame
+        )
+        exam_result_tree_frame.pack(
+            side="left",
+            fill="x",
+            expand=True
+        )
+
         self.exam_results_tree = ttk.Treeview(
-            exam_result_content_frame,
+            exam_result_tree_frame,
             columns=("exam_type", "grade", "status"),
             show="headings",
             height=4
@@ -63,8 +72,23 @@ class ExamResults(tk.LabelFrame):
         )
         self.exam_results_tree.pack(
             side="left",
-            fill="x",
+            fill="both",
             expand=True
+        )
+
+        # Vertikale Scrollbar
+        scrollbar = ttk.Scrollbar(
+            exam_result_tree_frame,
+            orient="vertical",
+            command=self.exam_results_tree.yview
+        )
+        scrollbar.pack(
+            side="right",
+            fill="y"
+        )
+
+        self.exam_results_tree.configure(
+            yscrollcommand=scrollbar.set
         )
         self.exam_results_tree.bind(
             "<<TreeviewSelect>>",
