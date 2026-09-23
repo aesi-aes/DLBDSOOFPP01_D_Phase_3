@@ -162,10 +162,12 @@ class ModuleList(tk.LabelFrame):
             pady=(10, 0)
         )
 
+    # UI Update
     def update(self):
         self.update_tree()
         self.update_controls()
 
+    # Treeview updaten
     def update_tree(self):
         # "Geöffnete" Einträge merken.
         open_semesters = {
@@ -245,6 +247,7 @@ class ModuleList(tk.LabelFrame):
 
         self.update_controls()
 
+    # Selektion ändern
     def on_tree_selection_changed(self, event):
         # Selektion
         selected_items = self.module_tree.selection()
@@ -294,6 +297,7 @@ class ModuleList(tk.LabelFrame):
 
         self.on_module_selected_callback(module)
 
+    # Buttons-Zustand setzen (disablen/enablen)
     def update_controls(self):
         has_semester = self.selected_semester is not None
         has_module = self.selected_module is not None
@@ -314,6 +318,7 @@ class ModuleList(tk.LabelFrame):
             state="normal" if has_module else "disabled"
         )
 
+    # Aktuelles Semester festlegen
     def on_set_current_semester(self):
         if self.selected_semester is None:
             return
@@ -324,7 +329,9 @@ class ModuleList(tk.LabelFrame):
 
         self.update()
 
+    # Neues Semester anlegen
     def on_new_semester(self):
+        # Dialog neues Semester
         name = simpledialog.askstring(
             "Neues Semester",
             "Name des Semesters:"
@@ -335,6 +342,7 @@ class ModuleList(tk.LabelFrame):
 
         name = name.strip()
 
+        # Error Handling
         if not name:
             messagebox.showerror(
                 "Ungültige Eingabe",
@@ -348,12 +356,14 @@ class ModuleList(tk.LabelFrame):
 
         self.update()
 
+    # Semester löschen
     def on_delete_semester(self):
         if self.selected_semester is None:
             return
 
         semester = self.selected_semester
 
+        # Löschen bestätigen Dialog
         confirmed = messagebox.askyesno(
             "Semester löschen",
             f"Möchtest du '{semester.name}' wirklich löschen?\n\n"
@@ -368,6 +378,7 @@ class ModuleList(tk.LabelFrame):
         try:
             self.controller.on_semester_deleted(semester)
         except ValueError as error:
+            # Fehler-Dialog
             messagebox.showerror(
                 "Semester kann nicht gelöscht werden",
                 str(error),
@@ -382,10 +393,12 @@ class ModuleList(tk.LabelFrame):
 
         self.on_module_selected_callback(None)
 
+    # Neues Modul anlegen
     def on_new_module(self):
         if self.selected_semester is None:
             return
 
+        # Dialog zum anlegen eines neuen Moduls
         dialog = tk.Toplevel(self)
         dialog.title("Modul bearbeiten")
         dialog.transient(self.winfo_toplevel())
@@ -402,6 +415,7 @@ class ModuleList(tk.LabelFrame):
             sticky="w"
         )
 
+        # Modulnummer eingeben
         module_number_entry = tk.Entry(dialog)
         module_number_entry.grid(
             row=0,
@@ -421,6 +435,7 @@ class ModuleList(tk.LabelFrame):
             sticky="w"
         )
 
+        # Modulnamen eingeben
         module_name_entry = tk.Entry(dialog)
         module_name_entry.grid(
             row=1,
@@ -429,10 +444,12 @@ class ModuleList(tk.LabelFrame):
             pady=5
         )
 
+        # Speichern
         def save():
             module_number = module_number_entry.get().strip()
             module_name = module_name_entry.get().strip()
 
+            # Error Handling: Modulnummer
             if not module_number:
                 messagebox.showerror(
                     "Ungültige Eingabe",
@@ -442,6 +459,7 @@ class ModuleList(tk.LabelFrame):
                 )
                 return
 
+            # Error Handling: Modulname
             if not module_name:
                 messagebox.showerror(
                     "Ungültige Eingabe",
@@ -456,12 +474,14 @@ class ModuleList(tk.LabelFrame):
                 name=module_name
             )
 
+            # Modul hinzufügen
             try:
                 self.on_module_added_callback(
                     self.selected_semester,
                     module
                 )
             except ValueError as error:
+                # Error Handling
                 messagebox.showerror(
                     "Modul kann nicht hinzugefügt werden",
                     str(error),
@@ -500,6 +520,7 @@ class ModuleList(tk.LabelFrame):
 
         module_number_entry.focus_set()
 
+    # Modul löschen
     def on_delete_module(self):
         if self.selected_module is None:
             return
@@ -520,6 +541,7 @@ class ModuleList(tk.LabelFrame):
         try:
             self.on_module_deleted_callback(self.selected_semester, module)
         except ValueError as error:
+            # Error Handling UI
             messagebox.showerror(
                 "Modul kann nicht gelöscht werden",
                 str(error),

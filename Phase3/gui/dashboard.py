@@ -178,6 +178,7 @@ class Dashboard:
 
         self.update_dashboard()
 
+    # vollständige Dashboard-UI updaten
     def update_dashboard(self):
         self.update_study_progress()
         self.update_average()
@@ -185,6 +186,7 @@ class Dashboard:
         self.module_list.update()
         self.exam_results.update()
 
+    # Studienfortschritt-UI updaten
     def update_study_progress(self):
         study_progress = self.controller.study_service.get_study_progress()
 
@@ -223,11 +225,13 @@ class Dashboard:
             text=f"{completed_modules} von {total_modules} Modulen"
         )
 
+    # Durchschnittsnote-UI updaten
     def update_average(self):
         average = self.controller.grade_service.get_current_average()
 
         self.average_label.config(text=f"{average:.2f}")
 
+    # Ziel-Notendurchschnitt-UI updaten
     def update_target_display(self):
         target_average = (
             self.controller.grade_service.get_target_average()
@@ -246,18 +250,22 @@ class Dashboard:
             text=status_text
         )
 
+    # Module selektiert
     def on_module_selected(self, module):
         self.exam_results.update(module)
         self.exam_result_editor.update()
 
+    # Modul hinzugefügt
     def on_module_added(self, semester, module):
         self.controller.on_module_added(semester, module)
         self.update_dashboard()
 
+    # Modul gelöscht
     def on_module_deleted(self, semester, module):
         self.controller.on_module_deleted(semester, module)
         self.update_dashboard()
 
+    # Notendurchschnitt festlegen
     def on_set_target_average(self):
         # float-Zahl soll abgefragt werden, falls nicht: Fehlermeldung
         try:
@@ -283,11 +291,13 @@ class Dashboard:
 
         self.update_target_display()
 
+    # Prüfungsergebnis in UI ausgewählt
     def on_exam_result_selected(self, result):
         self.exam_result_editor.update(exam_result=result)
         self.update_average()
         self.update_study_progress()
 
+    # neues Prüfugnsergebnis hinzufügen
     def on_new_exam_result(self):
         if self.module_list.selected_module is None:
             return
@@ -295,6 +305,7 @@ class Dashboard:
         self.exam_result_editor.update(is_creating=True)
         self.exam_result_editor.focus()
 
+    # Prüfugnsergebnis speichern
     def on_save_exam_result(self, exam_type_value, grade_value):
         module = self.module_list.selected_module
 
@@ -352,6 +363,7 @@ class Dashboard:
         self.exam_result_editor.update()
         self.update_dashboard()
 
+    # Prüfugnsergebnis löschen
     def on_delete_exam_result(self, result):
         module = self.module_list.selected_module
 

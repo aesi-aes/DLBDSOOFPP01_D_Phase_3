@@ -17,6 +17,7 @@ class DashboardController:
         self.study_service = study_service
         self.grade_service = grade_service
 
+    # Prüfungsergebnis hinzufügen
     def on_exam_result_added(
             self,
             module: Module,
@@ -27,6 +28,7 @@ class DashboardController:
             exam_result
         )
 
+    # Prüfungsergebnis löschen
     def on_exam_result_deleted(
             self,
             module: Module,
@@ -37,6 +39,7 @@ class DashboardController:
             exam_result
         )
 
+    # Ziel-Notendurchschnitt festlegen
     def on_target_average_changed(
             self,
             target_average: float
@@ -45,21 +48,27 @@ class DashboardController:
             target_average
         )
 
+    # aktuelles Semester festlegen
     def on_current_semester_changed(self, semester: Semester):
         self.study_service.set_current_semester(semester)
 
+    # Semester hinzufügen
     def on_semester_added(self, semester: Semester):
         self.study_service.add_semester(semester)
 
+    # Semester löschen
     def on_semester_deleted(self, semester: Semester):
         self.study_service.delete_semester(semester)
 
+    # Modul hinzufügen
     def on_module_added(self, semester, module):
         self.study_service.add_module(semester, module)
 
+    # Modul löschen
     def on_module_deleted(self, semester, module):
         self.study_service.delete_module(semester, module)
 
+    # Prüfungsergebnis ändern
     def update_exam_result(
         self,
         exam_result: ExamResult,

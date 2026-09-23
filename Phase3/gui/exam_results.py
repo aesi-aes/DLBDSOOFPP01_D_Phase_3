@@ -124,6 +124,7 @@ class ExamResults(tk.LabelFrame):
 
         self.update_controls()
 
+    # UI updaten
     def update(self, module=None):
         if module is None:
             module = self.get_selected_module()
@@ -157,6 +158,7 @@ class ExamResults(tk.LabelFrame):
         self.selected_result = None
         self.update_controls()
 
+    # UI-Einträge leeren / löschen
     def clear(self):
         # Liste der Prüfungsergebnisse löschen
         for item in self.exam_results_tree.get_children():
@@ -164,6 +166,7 @@ class ExamResults(tk.LabelFrame):
 
         self.exam_result_items.clear()
 
+    # UI-Update
     def update_controls(self):
         has_module = self.get_selected_module() is not None
         has_result = self.selected_result is not None
@@ -177,6 +180,7 @@ class ExamResults(tk.LabelFrame):
             state="normal" if has_result else "disabled"
         )
 
+    # UI-Selektion des Ergebnis Trees
     def on_result_tree_selected(self, event):
         # UI-Selektion.
         selected_items = self.exam_results_tree.selection()
@@ -203,6 +207,7 @@ class ExamResults(tk.LabelFrame):
 
         self.on_result_selected_callback(result)
 
+    # Neues Prüfungsergebnis
     def on_new_result(self):
         if self.get_selected_module() is None:
             return
@@ -212,6 +217,7 @@ class ExamResults(tk.LabelFrame):
 
         self.on_new_result_callback()
 
+    # Prüfungsergebnis löschen
     def on_delete_result(self):
         module = self.get_selected_module()
 

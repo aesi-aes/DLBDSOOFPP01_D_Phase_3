@@ -92,6 +92,7 @@ class ExamResultEditor(tk.LabelFrame):
             pady=(10, 0)
         )
 
+    # UI Update
     def update(
         self,
         exam_result=None,
@@ -143,15 +144,18 @@ class ExamResultEditor(tk.LabelFrame):
                     ''
                 )
 
+    # UI-Werte löschen
     def clear(self):
         # Editor-Werte löschen
         self.exam_type_combobox.set("")
         self.grade_entry.delete(0, tk.END)
 
+    # Combobox auswählen
     def focus(self):
         # Combobox auswählen
         self.exam_type_combobox.focus_set()
 
+    # Speichern
     def on_save(self):
         self.on_save_callback(
             self.exam_type_combobox.get(),
