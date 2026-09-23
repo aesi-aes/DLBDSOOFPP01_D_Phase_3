@@ -35,7 +35,7 @@ Das Programm verwendet ausschließlich Python-Standardbibliotheken. Es müssen d
 
 ### 1. Repository herunterladen
 
-Repository über Git in einen <Zielordner> klonen:
+Repository über Git in einen [Zielordner] lonen:
 
 ```powershell
 git clone https://github.com/aesi-aes/DLBDSOOFPP01_D_Phase_3.git
@@ -44,7 +44,7 @@ git clone https://github.com/aesi-aes/DLBDSOOFPP01_D_Phase_3.git
 Anschließend in den Projektordner wechseln:
 
 ```powershell
-cd <Zielordner>\DLBDSOOFPP01_D_Phase_3\Phase3
+cd [Zielordner]\DLBDSOOFPP01_D_Phase_3\Phase3
 ```
 
 Alternativ kann das Repository auf GitHub über **Code → Download ZIP** heruntergeladen und anschließend entpackt werden.
